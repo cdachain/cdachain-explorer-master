@@ -1,6 +1,6 @@
 "use strict";
 var version = require('./version.json').version;
-var utils = require('./utils');
+var utils = require('./utils').default;
 var HttpRequest = require('./httprequest').default;
 
 var Czr = function Czr(request) {

@@ -5,154 +5,65 @@
             <div class="container">
                 <div class="bui-dlist">
                     <div class="block-item-des">
-                        <strong class="bui-dlist-tit">blockHash
+                        <strong class="bui-dlist-tit">交易号
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">{{blockHash}}</div>
                     </div>
                     <div class="block-item-des">
-                        <strong class="bui-dlist-tit">from
+                        <strong class="bui-dlist-tit">状态
+                            <span class="space-des"></span>
+                        </strong>
+                        <div class="bui-dlist-det">
+                            <span v-if="txStatus === -1" class="txt-warning">
+                                不稳定
+                            </span>
+                            <span v-else-if="txStatus === 200" class="txt-success">
+                                成功
+                            </span>
+                            <span v-else-if="txStatus === 300" class="txt-info">
+                                作废
+                            </span>
+                            <span v-else-if="txStatus === 400" class="txt-danger">
+                                失败
+                            </span>
+                        </div>
+                    </div>
+                    <div class="block-item-des">
+                        <strong class="bui-dlist-tit">发款方
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">{{blockInfo.from}}</div>
                     </div>
                     <div class="block-item-des">
-                        <strong class="bui-dlist-tit">to
+                        <strong class="bui-dlist-tit">收款方
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">{{blockInfo.to}}</div>
                     </div>
                     <div class="block-item-des">
-                        <strong class="bui-dlist-tit">amount
+                        <strong class="bui-dlist-tit">金额
                             <span class="space-des"></span>
                         </strong>
-                        <div class="bui-dlist-det">{{blockInfo.amount}}</div>
+                        <div class="bui-dlist-det">{{blockInfo.amount | toCZRVal}} CZR</div>
                     </div>
                     <div class="block-item-des">
-                        <strong class="bui-dlist-tit">previous
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.previous}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">parents
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.parents}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">best_parent
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.best_parent}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">data
+                        <strong class="bui-dlist-tit">数据
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">{{blockInfo.data || '-'}}</div>
                     </div>
                     <div class="block-item-des">
-                        <strong class="bui-dlist-tit">exec_timestamp
+                        <strong class="bui-dlist-tit">发送时间
                             <span class="space-des"></span>
                         </strong>
-                        <div class="bui-dlist-det">{{blockInfo.exec_timestamp}}</div>
+                        <div class="bui-dlist-det">{{blockInfo.exec_timestamp|toDate}}</div>
                     </div>
                     <div class="block-item-des">
-                        <strong class="bui-dlist-tit">is_fail
+                        <strong class="bui-dlist-tit">主网时间
                             <span class="space-des"></span>
                         </strong>
-                        <div class="bui-dlist-det">{{blockInfo.is_fail}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">is_fork
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.is_fork}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">is_free
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.is_free}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">is_invalid
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.is_invalid}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">is_on_mc
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.is_on_mc}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">is_stable
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.is_stable}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">last_summary
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.last_summary}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">last_summary_block
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.last_summary_block}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">latest_included_mci
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.latest_included_mci}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">level
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.level}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">mc_timestamp
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.mc_timestamp}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">mci
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.mci}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">signature
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.signature}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">witness_list
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.witness_list || '-'}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">witness_list_block
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.witness_list_block}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">witnessed_level
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.witnessed_level}}</div>
+                        <div class="bui-dlist-det">{{blockInfo.mc_timestamp|toDate}}</div>
                     </div>
                 </div>
             </div>
@@ -164,6 +75,8 @@
 
 <script>
 import HeaderCps from "@/components/Header/Header";
+let self = null;
+
 export default {
     name: "Block",
     components: {
@@ -172,6 +85,7 @@ export default {
     data() {
         return {
             blockHash: this.$route.params.id,
+            txStatus: "-",
             blockInfo: {
                 from: "-",
                 to: "-",
@@ -180,7 +94,7 @@ export default {
                 parents: "-",
                 best_parent: "-",
                 data: "",
-                exec_timestamp: "-",
+                exec_timestamp: "0",
                 is_fail: "0",
                 is_fork: "0",
                 is_free: "0",
@@ -201,6 +115,7 @@ export default {
         };
     },
     created() {
+        self = this;
         this.initDatabase();
     },
     methods: {
@@ -214,10 +129,61 @@ export default {
                 .then(function(data) {
                     if (!data.error) {
                         self.blockInfo = data;
+                        if (self.blockInfo.is_stable == "0") {
+                            //不稳定
+                            self.txStatus = -1; //不稳定
+                        } else if (self.blockInfo.is_stable == "1") {
+                            //稳定
+                            if (
+                                self.blockInfo.is_fork == "1" ||
+                                self.blockInfo.is_invalid == "1"
+                            ) {
+                                self.txStatus = 300; //作废
+                                //
+                            } else {
+                                if (self.blockInfo.is_fail == "1") {
+                                    self.txStatus = 400; //失败
+                                } else {
+                                    self.txStatus = 200; //成功
+                                }
+                            }
+                        }
                     } else {
                         self.$message.error(data.error);
                     }
+                })
+                .catch(function(err) {
+                    console.log("error", err);
                 });
+        }
+    },
+    filters: {
+        toCZRVal: function(val) {
+            let tempVal = self.$czr.utils.fromWei(val, "czr");
+            return tempVal; //TODO Keep 4 decimal places
+        },
+        toDate: function(val) {
+            if (val == "0" || !val) {
+                return "-";
+            }
+            let newDate = new Date();
+            newDate.setTime(val * 1000);
+            let addZero = function(val) {
+                return val < 10 ? "0" + val : val;
+            };
+            return (
+                newDate.getFullYear() +
+                " / " +
+                addZero(newDate.getMonth() + 1) +
+                " / " +
+                addZero(newDate.getDate()) +
+                " " +
+                addZero(newDate.getHours()) +
+                ":" +
+                addZero(newDate.getMinutes()) +
+                ":" +
+                addZero(newDate.getSeconds())
+            );
         }
     }
 };
@@ -240,9 +206,10 @@ export default {
     color: black;
     text-align: left;
     padding-top: 20px;
-    padding-bottom: 50px;
+    padding-bottom: 80px;
 }
 .block-item-des {
+    padding: 10px 0;
     border-bottom: 1px dashed #f6f6f6;
 }
 @media (max-width: 1199px) {
@@ -302,6 +269,19 @@ export default {
         word-break: break-all;
         overflow: hidden;
     }
+}
+
+.txt-warning {
+    color: #e6a23c;
+}
+.txt-info {
+    color: #909399;
+}
+.txt-success {
+    color: #67c23a;
+}
+.txt-danger {
+    color: #f56c6c;
 }
 
 .bui-dlist-tit .space-des {

@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/components/Home/Home'
 import Block from '@/components/Block/Block'
+import Account from '@/components/Account/Account'
+import NotFound from '@/components/NotFound/NotFound'
 
 Vue.use(Router)
 
@@ -19,8 +21,12 @@ export default new Router({
     },
     {
       path: '/account/:id',
-      name: 'Block',
-      component: Block
+      name: 'Account',
+      component: Account
+    },
+    { 
+      path: '*', 
+      component: NotFound
     }
   ]
 })

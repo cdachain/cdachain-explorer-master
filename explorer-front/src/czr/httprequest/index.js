@@ -2,10 +2,9 @@
 import rpc from 'node-json-rpc'
 
 var options = {
-    // host: '192.168.10.232',
-    host: "127.0.0.1",//7076
-    // host: "192.168.10.221",//8765
-    port: 7076,//
+    // host: "rpc.testnet.canonchain.com",//7076
+    host: "127.0.0.1",//8765
+    port: 7076,//80
 };
 
 
@@ -239,22 +238,29 @@ HttpRequest.prototype.getBlock = async function(blockHash) {
 };
 
 //获取列表
-HttpRequest.prototype.blockList = async function(account,limit,last_hash) {
+HttpRequest.prototype.blockList = async function(account, limit, last_hash) {
+    var opt;
     if(!account){
-        return 0//没有参数
+        return 0//没有参数 
     }
     if(!limit){
-        return 0//没有参数
+        return 1//没有参数 
     }
     if(!last_hash){
-        last_hash=null;
+        opt = {
+            "action": "block_list",
+            "account": account,
+            "limit": limit
+        };
+    }else{
+        opt = {
+            "action": "block_list",
+            "account": account,
+            "limit": limit,
+            "last_hash": last_hash
+        };
     }
-    var opt = {
-        "action": "block_list",
-        "account": account,
-        "limit": limit,
-        "last_hash": last_hash,
-    };
+
     let ret = await asyncfunc(opt);
     return ret;
 };

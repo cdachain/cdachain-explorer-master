@@ -35,11 +35,10 @@ export default {
             // 92CFDBBDA091FE3D12DFCEFB28AAC648277F85278A22253F11A68325314BEAEB
 
             var accountReg = /^(?:(?:c|C)(?:z|Z)(?:r|R))_([a-zA-Z0-9]{60})/;
-            // czr_3e3j5tkog48pnny9dmfzj1r16pg8t1e76dz5tmac6iq689wyjfpiij4txtdo"
+            // czr_1wyras8kej7hxua9uirsdhet7tuaghn9nbfwsxdru8w34gk8st5yikstoku3
 
             if (blockReg.test(currentVal)) {
                 //block
-                console.log("block");
                 this.$router.push("/block/" + currentVal);
             } else if (accountReg.test(currentVal)) {
                 //account

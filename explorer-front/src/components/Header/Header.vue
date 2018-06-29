@@ -1,7 +1,7 @@
 <template>
     <div id="header">
       <div class="container b-flex b-flex-justify">
-        <a class="logo-wrap" href="/">
+        <a class="logo-wrap" href="/testnet">
           <img src="@/assets/logo.png" alt="logo" class="czr-logo">
         </a>
         <div class="header-right">
@@ -10,7 +10,6 @@
           </ul>
         </div>
       </div>
-
       <el-dialog
         title="关于标准链"
         :visible.sync="dialogVisible"
