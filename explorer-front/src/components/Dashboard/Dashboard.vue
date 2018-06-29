@@ -21,16 +21,16 @@ export default {
     data() {
         return {
             slogan: "标准链 区块浏览器",
-            sloganDes: "提供交易和账户相关的查询功能",
+            sloganDes: "提供交易号和账户的相关查询",
             form: {
                 searchVal: "",
-                placeholder: "在此输入交易id、账户id进行查询"
+                placeholder: "请输入CZR交易号或账户进行查询"
             }
         };
     },
     methods: {
         onSubmit() {
-            var currentVal = this.form.searchVal;            
+            var currentVal = this.form.searchVal;
             var blockReg = /[A-Z0-9a-z]{64}/;
             // 92CFDBBDA091FE3D12DFCEFB28AAC648277F85278A22253F11A68325314BEAEB
 

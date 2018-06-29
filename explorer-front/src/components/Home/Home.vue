@@ -1,8 +1,10 @@
 <template>
-  <div class="page-home">
-    <header-cps></header-cps>
-    <dashboard></dashboard>
-  </div>
+    <div class="page-home">
+        <header-cps></header-cps>
+        <dashboard></dashboard>
+        <vue-particles class="home-particles" color="#dedede" :particleOpacity="0.7" :particlesNumber="80" shapeType="circle" :particleSize="4" linesColor="#dedede" :linesWidth="1" :lineLinked="true" :lineOpacity="0.4" :linesDistance="150" :moveSpeed="3" :hoverEffect="true" hoverMode="grab" :clickEffect="true" clickMode="repulse">
+        </vue-particles>
+    </div>
 </template>
 
 <script>
@@ -37,5 +39,9 @@ export default {
         #353469 93%,
         #333366 100%
     );
+}
+.home-particles{
+    width: 100%;
+    height: 100%;
 }
 </style>

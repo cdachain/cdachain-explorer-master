@@ -22,7 +22,7 @@
                     <div class="transfer-log" v-loading="loadingSwitch">
                         <template v-for="item in accountInfo.currentTxList">
                             <div v-if="item.to == accountInfo.address">
-                                <a class="transfer-itemplus-assets">
+                                <router-link class="transfer-itemplus-assets"  :to="'/block/'+ item.hash">
                                     <div class="transfer-info">
                                         <p class="by-address">{{item.from}}</p>
                                         <p class="transfer-time">{{item.exec_timestamp |toDate }}</p>
@@ -30,11 +30,11 @@
                                     <div class="transfer-assets">
                                         <div class="assets">+ {{item.amount | toCZRVal }} CZR</div>
                                     </div>
-                                </a>
+                                </router-link>
                             </div>
 
                             <div v-if="item.from == accountInfo.address">
-                                <a class="transfer-item less-assets ">
+                                <router-link class="transfer-item less-assets "  :to="'/block/'+ item.hash">
                                     <div class="transfer-info">
                                         <p class="by-address">{{item.to}}</p>
                                         <p class="transfer-time">{{item.exec_timestamp |toDate }}</p>
@@ -42,7 +42,7 @@
                                     <div class="transfer-assets">
                                         <div class="assets">- {{item.amount | toCZRVal }} CZR</div>
                                     </div>
-                                </a>
+                                </router-link>
                             </div>
                         </template>
                         <div class="pagin-wrap b-flex b-flex-justify" v-if="accountInfo.tx_list.length>=pagingSwitch.limit">
@@ -54,7 +54,7 @@
                     <!--  No transaction record  -->
                     <div v-if="accountInfo.tx_list.length==0" class="no-transfer-log">
                         <i class="el-icon-document iconfont"></i>
-                        <p class="no-list">没有记录</p>
+                        <p class="no-list">暂无交易记录</p>
                     </div>
                 </div>
             </div>
@@ -474,6 +474,7 @@ export default {
     }
     .account-content .transfer-log .transfer-info {
         width: 800px;
+        padding-left: 10px;
         text-align: left;
     }
     .transfer-log .transfer-assets .assets {

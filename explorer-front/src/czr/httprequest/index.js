@@ -3,8 +3,8 @@ import rpc from 'node-json-rpc'
 
 var options = {
     host: "rpc.testnet.canonchain.com",//80
-    // host: "127.0.0.1",//8765
-    port: 80,//80
+    // host: "127.0.0.1",//7076
+    port: 80
 };
 
 
