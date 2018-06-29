@@ -212,7 +212,6 @@ export default {
                     return data;
                 })
                 .then(function(data) {
-                    console.log("拿到数据拉", data);
                     if (!data.error) {
                         self.blockInfo = data;
                     } else {

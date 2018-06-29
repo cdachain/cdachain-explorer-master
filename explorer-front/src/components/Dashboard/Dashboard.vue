@@ -1,18 +1,17 @@
 <template>
-  <div class="dash-board-wrap">
-    <div class="slogan-wrap">
-      <h1 class="slogan">{{slogan}}</h1>
-      <p class="slogan-des">{{sloganDes}}</p>
+    <div class="dash-board-wrap">
+        <div class="slogan-wrap">
+            <h1 class="slogan">{{slogan}}</h1>
+            <p class="slogan-des">{{sloganDes}}</p>
+        </div>
+        <div class="input-wrap">
+            <el-form class="demo-form-inline" @submit.native.prevent="onSubmit">
+                <el-input v-model="form.searchVal" :placeholder="form.placeholder" @keydown.enter='onSubmit($event)'>
+                    <el-button slot="append" icon="el-icon-search" @click="onSubmit()"></el-button>
+                </el-input>
+            </el-form>
+        </div>
     </div>
-    <div class="input-wrap">
-
-      <!-- <el-form class="demo-form-inline" v-on:submit.stop.prevent="onSubmit"> -->
-      <el-input v-model="form.searchVal" :placeholder="form.placeholder" @keydown.enter='onSubmit($event)'>
-        <el-button slot="append" icon="el-icon-search" @click="onSubmit()"></el-button>
-      </el-input>
-      <!-- </el-form> -->
-    </div>
-  </div>
 </template>
 <script>
 import Api from "@/api/api";
@@ -31,12 +30,11 @@ export default {
     },
     methods: {
         onSubmit() {
-            var currentVal = this.form.searchVal;
-
-            var blockReg = /[A-Z0-9a-z]{64}/; 
+            var currentVal = this.form.searchVal;            
+            var blockReg = /[A-Z0-9a-z]{64}/;
             // 92CFDBBDA091FE3D12DFCEFB28AAC648277F85278A22253F11A68325314BEAEB
 
-            var accountReg = /^(?:(?:c|C)(?:z|Z)(?:r|R))_([a-zA-Z0-9]{60})/; 
+            var accountReg = /^(?:(?:c|C)(?:z|Z)(?:r|R))_([a-zA-Z0-9]{60})/;
             // czr_3e3j5tkog48pnny9dmfzj1r16pg8t1e76dz5tmac6iq689wyjfpiij4txtdo"
 
             if (blockReg.test(currentVal)) {
@@ -46,6 +44,8 @@ export default {
             } else if (accountReg.test(currentVal)) {
                 //account
                 this.$router.push("/account/" + currentVal);
+            } else if (!currentVal) {
+                this.$message.error("请输入您要查询的账号或交易号");
             } else {
                 this.$message.error("输入值不是合法的账号或交易号，请仔细核对");
             }
@@ -61,15 +61,15 @@ export default {
     text-shadow: -5px 5px 0 rgba(0, 0, 0, 0.1);
 }
 @media (max-width: 1199px) {
-  .dash-board-wrap .slogan {
-    font-size: 34px;
-}
+    .dash-board-wrap .slogan {
+        font-size: 34px;
+    }
 }
 
 @media (min-width: 1200px) {
-  .dash-board-wrap .slogan {
-    font-size: 56px;
-}
+    .dash-board-wrap .slogan {
+        font-size: 56px;
+    }
 }
 
 .dash-board-wrap .slogan-des {
