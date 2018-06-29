@@ -16,7 +16,7 @@
         :visible.sync="dialogVisible"
         :modal='true'
         :append-to-body="true"
-        width="40%">
+        width="300px">
         <span>
           <div class="about-czr-area">
             <div class="czr-des">
