@@ -3,6 +3,7 @@
         <header-cps></header-cps>
         <div class="block-info-wrap">
             <div class="container">
+                <search></search>
                 <div class="bui-dlist">
                     <div class="block-item-des">
                         <strong class="bui-dlist-tit">账号
@@ -66,12 +67,13 @@
 
 <script>
 import HeaderCps from "@/components/Header/Header";
+import Search from "@/components/Search/Search";
 let self = null;
 
 export default {
     name: "Block",
     components: {
-        HeaderCps
+        HeaderCps,Search
     },
     data() {
         return {
@@ -378,6 +380,8 @@ export default {
         color: #3f3f3f;
         font-size: 16px;
         line-height: 2.4;
+        margin-top: 20px;
+        border-top: 1px dashed #f6f6f6;
     }
     .block-item-des {
         display: -webkit-box;

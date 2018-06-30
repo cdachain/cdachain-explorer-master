@@ -3,6 +3,9 @@
         <header-cps></header-cps>
         <div class="block-info-wrap">
             <div class="container">
+                <div class="search-wrap">
+                    <search></search>
+                </div>
                 <div class="bui-dlist">
                     <div class="block-item-des">
                         <strong class="bui-dlist-tit">交易号
@@ -27,19 +30,22 @@
                             <span v-else-if="txStatus === 400" class="txt-danger">
                                 失败
                             </span>
+                            <span v-else class="xt-info">
+                                -
+                            </span>
                         </div>
                     </div>
                     <div class="block-item-des">
                         <strong class="bui-dlist-tit">发款方
                             <span class="space-des"></span>
                         </strong>
-                        <div class="bui-dlist-det">{{blockInfo.from}}</div>
+                        <div class="bui-dlist-det">{{blockInfo.from || '-'}}</div>
                     </div>
                     <div class="block-item-des">
                         <strong class="bui-dlist-tit">收款方
                             <span class="space-des"></span>
                         </strong>
-                        <div class="bui-dlist-det">{{blockInfo.to}}</div>
+                        <div class="bui-dlist-det">{{blockInfo.to || '-'}}</div>
                     </div>
                     <div class="block-item-des">
                         <strong class="bui-dlist-tit">金额
@@ -75,12 +81,15 @@
 
 <script>
 import HeaderCps from "@/components/Header/Header";
+import Search from "@/components/Search/Search";
+
 let self = null;
 
 export default {
     name: "Block",
     components: {
-        HeaderCps
+        HeaderCps,
+        Search
     },
     data() {
         return {
@@ -246,6 +255,8 @@ export default {
         color: #3f3f3f;
         font-size: 16px;
         line-height: 2.4;
+        margin-top: 20px;
+        border-top: 1px dashed #f6f6f6;
     }
     .block-item-des {
         display: -webkit-box;
