@@ -66,7 +66,7 @@
                         <div class="bui-dlist-det">{{blockInfo.exec_timestamp|toDate}}</div>
                     </div>
                     <div class="block-item-des">
-                        <strong class="bui-dlist-tit">主网时间
+                        <strong class="bui-dlist-tit">主链时间
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">{{blockInfo.mc_timestamp|toDate}}</div>

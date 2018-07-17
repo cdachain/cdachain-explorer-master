@@ -18,6 +18,11 @@ export default {
             }
         };
     },
+    watch: {
+        $route(to, from) {
+            this.$router.go(0);
+        }
+    },
     methods: {
         onSubmit() {
             var currentVal = this.form.searchVal;

@@ -23,7 +23,7 @@
                     <div class="transfer-log" v-loading="loadingSwitch">
                         <template v-for="item in accountInfo.currentTxList">
                             <div v-if="item.to == accountInfo.address">
-                                <router-link class="transfer-itemplus-assets"  :to="'/block/'+ item.hash">
+                                <router-link class="transfer-item plus-assets" :to="'/block/'+ item.hash">
                                     <div class="transfer-info">
                                         <p class="by-address">{{item.from}}</p>
                                         <p class="transfer-time">{{item.exec_timestamp |toDate }}</p>
@@ -35,7 +35,7 @@
                             </div>
 
                             <div v-if="item.from == accountInfo.address">
-                                <router-link class="transfer-item less-assets "  :to="'/block/'+ item.hash">
+                                <router-link class="transfer-item less-assets " :to="'/block/'+ item.hash">
                                     <div class="transfer-info">
                                         <p class="by-address">{{item.to}}</p>
                                         <p class="transfer-time">{{item.exec_timestamp |toDate }}</p>
@@ -73,12 +73,13 @@ let self = null;
 export default {
     name: "Block",
     components: {
-        HeaderCps,Search
+        HeaderCps,
+        Search
     },
     data() {
         return {
             account: this.$route.params.id,
-            balance: "-",
+            balance: 0,
             pagingSwitch: {
                 limit: 10,
                 beforeDisabled: true,
@@ -146,7 +147,7 @@ export default {
                             message: data.error,
                             type: "error"
                         });
-                        self.loadingSwitch=false;
+                        self.loadingSwitch = false;
                         return;
                     }
 
@@ -190,20 +191,21 @@ export default {
                 var startHash = currentTxListHashBlock;
                 var tempAry = [];
                 var ele;
-                for(var j=0;j<_txList.length;j++){
-                    ele=_txList[j];
+                for (var j = 0; j < _txList.length; j++) {
+                    ele = _txList[j];
                     var _isSet = ele.hash == startHash;
                     var _isGoOn = tempAry.length < self.pagingSwitch.limit;
                     if (_isSet && _isGoOn) {
                         //如果是最后一个item，就不要循环了
-                        if(_txList[j].hash==_txList[_txList.length-1].hash){
+                        if (
+                            _txList[j].hash == _txList[_txList.length - 1].hash
+                        ) {
                             self.pagingSwitch.nextDisabled = true; //释放 后翻
                             break;
                         }
                         startHash = _txList[j + 1].hash;
                         tempAry.push(_txList[j + 1]);
                     }
-
                 }
                 // _txList.forEach ((ele, index) => {
                 //     var _isSet = ele.hash == startHash;
@@ -248,11 +250,18 @@ export default {
                             currentIndexInTxLixt = index;
                         }
                     });
-                    var currentTxLeng=self.accountInfo.currentTxList.length;
-                    var lessNum = (self.pagingSwitch.limit > currentTxLeng)
+                    var currentTxLeng = self.accountInfo.currentTxList.length;
+                    var lessNum =
+                        self.pagingSwitch.limit > currentTxLeng
                             ? currentTxLeng
                             : self.pagingSwitch.limit;
                     var targetIndex = currentIndexInTxLixt - lessNum;
+                    if (targetIndex < 0) {
+                        self.pagingSwitch.beforeDisabled = true;
+                        self.loadingSwitch = false;
+                        return;
+                    }
+
                     // var targetIndex = currentIndexInTxLixt - self.pagingSwitch.limit;
                     self.lastBlockHash = localList[targetIndex].hash;
                 }
