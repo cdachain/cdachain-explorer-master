@@ -13,8 +13,11 @@ module.exports = {
     //利用proxyTable我们能够将外部的请求通过webpack转发给本地，也就能够将跨域请求变成同域请求了。
     proxyTable: {
       '/api':{
-        target: 'http://localhost:8090/',
-        changeOrigin: true
+        target: 'http://localhost:3000/',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': '/api'
+        }
       }
     },
 

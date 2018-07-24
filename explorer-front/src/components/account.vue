@@ -1,0 +1,457 @@
+<template>
+    <div class="page-block">
+        <header-cps></header-cps>
+        <div class="block-info-wrap">
+            <div class="container">
+                <search></search>
+                <div class="sub-header">
+                    <strong class="sub_header-tit">账户信息</strong>
+                    <span class="sub_header-des">{{account}} </span>
+                </div>
+                <div class="bui-dlist">
+                    <div class="block-item-des">
+                        <strong class="bui-dlist-tit">余额
+                            <span class="space-des"></span>
+                        </strong>
+                        <div class="bui-dlist-det">{{accountInfo.balance}} CZR</div>
+                    </div>
+                    <div class="block-item-des">
+                        <strong class="bui-dlist-tit">交易数
+                            <span class="space-des"></span>
+                        </strong>
+                        <div class="bui-dlist-det">{{accountInfo.tran_count}} 次</div>
+                    </div>
+                </div>
+                <div class="account-content">
+                    <h2 class="transfer-tit">交易记录</h2>
+                    <div class="accounts-list-wrap" v-loading="loadingSwitch">
+                        <template>
+                            <el-table :data="tx_list" style="width: 100%">
+                                <el-table-column label="时间" width="180">
+                                    <template slot-scope="scope">
+                                        <span class="table-long-item">{{scope.row.exec_timestamp | toDate}}</span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="交易号" width="220">
+                                    <template slot-scope="scope">
+                                        <el-button @click="goBlockPath(scope.row.hash)" type="text">
+                                            <span class="table-long-item">{{scope.row.hash}}</span>
+                                        </el-button>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="发款方" width="220">
+                                    <template slot-scope="scope">
+                                        <template v-if="scope.row.is_from_this_account == false">
+                                            <el-button @click="goAccountPath(scope.row.from)" type="text">
+                                                <span class="table-long-item">{{scope.row.from}}</span>
+                                            </el-button>
+                                        </template>
+                                        <template v-else>
+                                            <span class="table-long-item">{{scope.row.from}}</span>
+                                        </template>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column width="80">
+                                    <template slot-scope="scope">
+                                        <span>
+                                            <el-button v-if="scope.row.is_from_this_account == true"  type="warning" size="mini">转出</el-button>
+                                            <el-button v-else type="success" size="mini">转入</el-button>
+                                        </span>
+
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="收款方" width="220">
+                                    <template slot-scope="scope">
+                                        <template v-if="scope.row.is_from_this_account == true">
+                                        <el-button @click="goAccountPath(scope.row.to)" type="text">
+                                            <span class="table-long-item">{{scope.row.to}}</span>
+                                        </el-button>
+                                        </template>
+                                        <template v-else>
+                                            <span class="table-long-item">{{scope.row.to}}</span>
+                                        </template>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="金额 / CZR" align="right">
+                                    <template slot-scope="scope">
+                                        <span class="table-long-item">{{scope.row.amount}}</span>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                            <div class="pagin-block">
+                                <el-pagination background layout="total,prev, pager, next" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="limitVal" :total="totalVal">
+                                </el-pagination>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!--  No transaction record  -->
+                    <div v-if="tx_list.length==0" class="no-transfer-log">
+                        <i class="el-icon-document iconfont"></i>
+                        <p class="no-list">暂无交易记录</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</template>
+
+<script>
+import HeaderCps from "@/components/Header/Header";
+import Search from "@/components/Search/Search";
+let self = null;
+
+export default {
+    name: "Block",
+    components: {
+        HeaderCps,
+        Search
+    },
+    data() {
+        return {
+            account: this.$route.params.id,
+            balance: 0,
+            pagingSwitch: {
+                limit: 2,
+                beforeDisabled: true,
+                nextDisabled: false
+            },
+            accountInfo: {
+                address: this.$route.params.id,
+                balance: 0,
+                tran_count: 0
+            },
+            tx_list: [],
+            loadingSwitch: true,
+
+            currentPage: 1,
+            limitVal: 2,
+            totalVal: 0
+        };
+    },
+    created() {
+        self = this;
+        this.initDatabase();
+        self.getAccountLists();
+        this.initTransactionInfo();
+    },
+    methods: {
+        initTransactionInfo() {},
+        initDatabase() {
+            self.$axios
+                .get("/api/get_account", {
+                    params: {
+                        account: self.accountInfo.address
+                    }
+                })
+                .then(function(response) {
+                    console.log("response", response.data);
+                    self.accountInfo.balance = response.data.account.balance;
+                    self.accountInfo.tran_count =
+                        response.data.account.tran_count;
+                })
+                .catch(function(error) {});
+        },
+        getAccountLists() {
+            self.$axios
+                .get("/api/get_account_list", {
+                    params: {
+                        account: self.accountInfo.address,
+                        page: self.currentPage
+                    }
+                })
+                .then(function(response) {
+                    self.totalVal = response.data.count;
+                    self.tx_list = response.data.tx_list;
+                    self.loadingSwitch = false;
+                })
+                .catch(function(error) {
+                    self.tx_list = [];
+                    self.loadingSwitch = false;
+                });
+        },
+        handleCurrentChange(val) {
+            self.getAccountLists();
+        },
+        goBlockPath(block) {
+            this.$router.push("/block/" + block);
+        },
+        goAccountPath(account) {
+            this.$router.push("/account/" + account);
+        }
+    },
+    filters: {
+        toCZRVal: function(val) {
+            let tempVal = self.$czr.utils.fromWei(val, "czr");
+            return tempVal; //TODO Keep 4 decimal places
+        },
+        toDate: function(val) {
+            if (val == "0" || !val) {
+                return "-";
+            }
+            let newDate = new Date();
+            newDate.setTime(val * 1000);
+            let addZero = function(val) {
+                return val < 10 ? "0" + val : val;
+            };
+            return (
+                newDate.getFullYear() +
+                " / " +
+                addZero(newDate.getMonth() + 1) +
+                " / " +
+                addZero(newDate.getDate()) +
+                " " +
+                addZero(newDate.getHours()) +
+                ":" +
+                addZero(newDate.getMinutes()) +
+                ":" +
+                addZero(newDate.getSeconds())
+            );
+        }
+    }
+};
+</script>
+
+<style   scoped>
+.page-block {
+    width: 100%;
+    position: relative;
+}
+#header {
+    color: #fff;
+    background: #5a59a0;
+}
+.sub-header {
+    border-top: 1px solid #bdbdbd;
+    border-bottom: 1px solid #bdbdbd;
+    color: #585858;
+    margin: 28px 0;
+    padding: 16px 10px;
+}
+.sub_header-tit {
+    display: inline-block;
+    padding-right: 10px;
+    margin: 0;
+}
+.sub_header-des {
+    text-align: left;
+    margin: 0;
+    table-layout: fixed;
+    word-break: break-all;
+    overflow: hidden;
+}
+.block-info-wrap {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    color: black;
+    text-align: left;
+    padding-top: 20px;
+    padding-bottom: 80px;
+}
+.block-item-des {
+    padding: 10px 0;
+    border-bottom: 1px dashed #f6f6f6;
+}
+@media (max-width: 1199px) {
+    .bui-dlist {
+        color: #3f3f3f;
+        font-size: 16px;
+        line-height: 2.4;
+    }
+    .block-item-des {
+        display: block;
+    }
+    .bui-dlist-tit {
+        display: block;
+        width: 100%; /* 默认值, 具体根据视觉可改 */
+        margin: 0;
+        text-align: left;
+    }
+    .bui-dlist-det {
+        display: block;
+        color: #5f5f5f;
+        text-align: left;
+        margin: 0;
+        table-layout: fixed;
+        word-break: break-all;
+        overflow: hidden;
+    }
+}
+
+@media (min-width: 1200px) {
+    .bui-dlist {
+        color: #3f3f3f;
+        font-size: 16px;
+        line-height: 2.4;
+        margin-top: 20px;
+        border-top: 1px dashed #f6f6f6;
+    }
+    .block-item-des {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+    }
+    .bui-dlist-tit {
+        float: left;
+        width: 20%; /* 默认值, 具体根据视觉可改 */
+        text-align: right;
+        margin: 0;
+    }
+    .bui-dlist-det {
+        float: left;
+        color: #5f5f5f;
+        width: 80%; /* 默认值，具体根据视觉可改 */
+        text-align: left;
+        margin: 0;
+        table-layout: fixed;
+        word-break: break-all;
+        overflow: hidden;
+    }
+}
+
+.txt-warning {
+    color: #e6a23c;
+}
+.txt-info {
+    color: #909399;
+}
+.txt-success {
+    color: #67c23a;
+}
+.txt-danger {
+    color: #f56c6c;
+}
+
+.bui-dlist-tit .space-des {
+    display: inline-block;
+    width: 10px;
+}
+
+/*  记录 */
+
+.account-content {
+    text-align: left;
+    margin-top: 40px;
+}
+.account-content .transfer-tit {
+    font-size: 18px;
+    font-weight: 400;
+}
+
+/* Transaction Record */
+.account-content .no-transfer-log {
+    text-align: center;
+    color: #9b9b9b;
+}
+.account-content .no-transfer-log .iconfont {
+    font-size: 128px;
+}
+.account-content .transfer-log {
+    padding: 22px 0;
+}
+
+.transfer-log .transfer-item {
+    background-color: #fff;
+    padding: 10px 0;
+    cursor: pointer;
+    border-bottom: 1px dashed #f0f0f0;
+    -webkit-user-select: none;
+}
+.transfer-log .transfer-item:hover {
+    text-decoration: none;
+    background-color: #f5f5f5;
+}
+
+@media (max-width: 1199px) {
+    .transfer-log .transfer-item {
+        display: block;
+    }
+    .transfer-time {
+        padding: 10px 0;
+    }
+}
+
+@media (min-width: 1200px) {
+    .transfer-log .transfer-item {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+    }
+    .account-content .transfer-log .transfer-info {
+        width: 800px;
+        padding-left: 10px;
+        text-align: left;
+    }
+    .transfer-log .transfer-assets .assets {
+        font-size: 18px;
+        height: 42px;
+        line-height: 42px;
+        width: 300px;
+        text-align: right;
+    }
+}
+
+.transfer-log .icon-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+}
+.transfer-log .icon-wrap .icon-transfer {
+    color: #fff;
+    position: relative;
+    left: 11px;
+    top: 4px;
+    font-size: 20px;
+}
+.transfer-log .plus-assets .icon-wrap {
+    background-color: rgba(0, 128, 0, 0.555);
+}
+.transfer-log .less-assets .icon-wrap {
+    background-color: rgba(255, 153, 0, 0.555);
+}
+.transfer-log .by-address {
+    width: 100%;
+    color: #9a9c9d;
+    table-layout: fixed;
+    word-break: break-all;
+    overflow: hidden;
+    color: rgb(54, 54, 54);
+}
+.transfer-log .transfer-time {
+    color: rgb(161, 161, 161);
+}
+
+.plus-assets .assets {
+    color: green;
+}
+.less-assets .assets {
+    color: rgb(255, 51, 0);
+}
+.iconfont {
+    font-size: 18px;
+    color: #bfbef8;
+}
+.no-list {
+    padding-top: 20px;
+}
+.pagin-wrap {
+    padding: 15px 0;
+}
+.pagin-block {
+    display: block;
+    margin: 20px 0;
+    text-align: right;
+}
+.table-long-item {
+    width: 180px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+</style>

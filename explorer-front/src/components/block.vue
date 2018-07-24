@@ -6,6 +6,10 @@
                 <div class="search-wrap">
                     <search></search>
                 </div>
+                <div class="sub-header">
+                    <strong class="sub_header-tit">交易号</strong>
+                    <span class="sub_header-des"> {{blockHash}} </span>
+                </div>
                 <div class="bui-dlist">
                     <div class="block-item-des">
                         <strong class="bui-dlist-tit">交易号
@@ -14,18 +18,24 @@
                         <div class="bui-dlist-det">{{blockHash}}</div>
                     </div>
                     <div class="block-item-des">
+                        <strong class="bui-dlist-tit">发送时间
+                            <span class="space-des"></span>
+                        </strong>
+                        <div class="bui-dlist-det">{{blockInfo.exec_timestamp|toDate}}</div>
+                    </div>
+                    <div class="block-item-des">
                         <strong class="bui-dlist-tit">状态
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">
                             <span v-if="txStatus === -1" class="txt-warning">
-                                不稳定
+                                等待确认
                             </span>
                             <span v-else-if="txStatus === 200" class="txt-success">
                                 成功
                             </span>
                             <span v-else-if="txStatus === 300" class="txt-info">
-                                作废
+                                失败
                             </span>
                             <span v-else-if="txStatus === 400" class="txt-danger">
                                 失败
@@ -58,18 +68,6 @@
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">{{blockInfo.data || '-'}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">发送时间
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.exec_timestamp|toDate}}</div>
-                    </div>
-                    <div class="block-item-des">
-                        <strong class="bui-dlist-tit">主链时间
-                            <span class="space-des"></span>
-                        </strong>
-                        <div class="bui-dlist-det">{{blockInfo.mc_timestamp|toDate}}</div>
                     </div>
                 </div>
             </div>
@@ -130,40 +128,37 @@ export default {
     methods: {
         initDatabase() {
             var self = this;
-            self.$czr.request
-                .getBlock(self.blockHash)
-                .then(function(data) {
-                    return data;
-                    console.log("data",data)
-                })
-                .then(function(data) {
-                    if (!data.error) {
-                        self.blockInfo = data;
-                        if (self.blockInfo.is_stable == "0") {
-                            //不稳定
-                            self.txStatus = -1; //不稳定
-                        } else if (self.blockInfo.is_stable == "1") {
-                            //稳定
-                            if (
-                                self.blockInfo.is_fork == "1" ||
-                                self.blockInfo.is_invalid == "1"
-                            ) {
-                                self.txStatus = 300; //作废
-                                //
-                            } else {
-                                if (self.blockInfo.is_fail == "1") {
-                                    self.txStatus = 400; //失败
-                                } else {
-                                    self.txStatus = 200; //成功
-                                }
-                            }
-                        }
-                    } else {
-                        self.$message.error(data.error);
+            self.$axios
+                .get("/api/get_transaction", {
+                    params: {
+                        transaction: self.blockHash
                     }
                 })
-                .catch(function(err) {
-                    console.log("error", err);
+                .then(function(response) {
+                    self.blockInfo = response.data.transaction;
+                    if (self.blockInfo.is_stable == false) {
+                        //不稳定
+                        self.txStatus = -1; //不稳定
+                    } else if (self.blockInfo.is_stable == true) {
+                        //稳定
+                        if (
+                            self.blockInfo.is_fork == true ||
+                            self.blockInfo.is_invalid == true
+                        ) {
+                            self.txStatus = 300; //作废
+                            //
+                        } else {
+                            if (self.blockInfo.is_fail == true) {
+                                self.txStatus = 400; //失败
+                            } else {
+                                self.txStatus = 200; //成功
+                            }
+                        }
+                    }
+                    self.loadingSwitch = false;
+                })
+                .catch(function(error) {
+                    self.loadingSwitch = false;
                 });
         }
     },
@@ -299,5 +294,24 @@ export default {
 .bui-dlist-tit .space-des {
     display: inline-block;
     width: 10px;
+}
+.sub-header {
+    border-top: 1px solid #bdbdbd;
+    border-bottom: 1px solid #bdbdbd;
+    color: #585858;
+    margin: 28px 0;
+    padding: 16px 10px;
+}
+.sub_header-tit {
+    display: inline-block;
+    padding-right: 10px;
+    margin: 0;
+}
+.sub_header-des {
+    text-align: left;
+    margin: 0;
+    table-layout: fixed;
+    word-break: break-all;
+    overflow: hidden;
 }
 </style>
