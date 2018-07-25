@@ -4,6 +4,7 @@ import Home from '@/components/Home/Home'
 
 
 import Block from '@/components/block'
+import Dag from '@/components/dag'
 import Account from '@/components/account'
 import Accounts from '@/components/accounts'
 import Transactions from '@/components/transactions'
@@ -27,6 +28,21 @@ export default new Router({
       path: '/transactions',
       name: 'Transactions',
       component: Transactions
+    },
+    {
+      path: '/dag',
+      name: 'Dag',
+      component: Dag
+    },
+    {
+      path: '/dag/:id',
+      name: 'Dag',
+      component: Dag
+    },
+    {
+      path: '/dag/:id/*',
+      name: 'Dag',
+      component: Dag
     },
     {
       path: '/block/:id',

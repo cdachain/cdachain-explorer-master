@@ -1,7 +1,5 @@
 //加载express模块
 var express = require('express');
-//加载数据库模块
-var pg = require('pg');
 //加载body-parser，用来处理post提交过来的数据
 var bodyParser = require('body-parser');
 //创建app应用 => NodeJS Http.createServer();

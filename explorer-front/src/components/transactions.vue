@@ -58,7 +58,6 @@
 <script>
 import HeaderCps from "@/components/Header/Header";
 import Search from "@/components/Search/Search";
-var BigNumber = require("big-number");
 
 let self = null;
 
