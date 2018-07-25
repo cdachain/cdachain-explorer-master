@@ -70,7 +70,7 @@ export default {
     data() {
         return {
             currentPage: 1,
-            limitVal: 2,
+            limitVal: 20,
             totalVal: 0,
             loadingSwitch: false,
             database: [

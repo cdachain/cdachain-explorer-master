@@ -22,7 +22,7 @@ router.get("/get_accounts", function (req, res, next) {
         count; //总条数
 
     var OFFSETVAL;//前面忽略的条数
-    var LIMITVAL = 2;//每页显示条数
+    var LIMITVAL = 20;//每页显示条数
     if (typeof Number(queryPage) !== "number") {
         page = 1;
     } else {
@@ -100,7 +100,7 @@ router.get("/get_account_list", function (req, res, next) {
         count; //总条数
 
     var OFFSETVAL;//前面忽略的条数
-    var LIMITVAL = 2;//每页显示条数
+    var LIMITVAL = 20;//每页显示条数
     if (typeof Number(queryPage) !== "number") {
         page = 1;
     } else {
@@ -155,7 +155,7 @@ router.get("/get_transactions", function (req, res, next) {
         count; //总条数
 
     var OFFSETVAL;//前面忽略的条数
-    var LIMITVAL = 2;//每页显示条数
+    var LIMITVAL = 20;//每页显示条数
     if (typeof Number(queryPage) !== "number") {
         page = 1;
     } else {

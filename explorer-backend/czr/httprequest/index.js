@@ -3,8 +3,8 @@ var rpc = require('node-json-rpc');
 
 var options = {
     // host: '192.168.10.232',
-    // host: '192.168.10.111',
-    host: "127.0.0.1",
+    host: '192.168.10.153',
+    // host: "127.0.0.1",
     port: 8765,
 };
 
@@ -280,9 +280,6 @@ last_mci:122}
 
  //传入的mci值,返回mci下所有block的信息
 HttpRequest.prototype.mciBlocks = async function(mci) {
-    if(!mci){
-        return 0//没有参数
-    }
     var opt = {
         "action": "mci_blocks",
         "mci": mci
@@ -301,17 +298,17 @@ HttpRequest.prototype.unstableBlocks = async function() {
 };
 
 //最后一个稳定点的mci，block信息
-HttpRequest.prototype.status = async function(last_stable_mci,last_mci) {
-    if(!last_stable_mci){
-        return 0//没有参数
+/* 
+return
+    {
+        last_stable_mci: 100, 
+        last_mci:122
     }
-    if(!last_mci){
-        return 1 //没有参数
-    }
+
+*/
+HttpRequest.prototype.status = async function() {
     var opt = {
-        "action": "status",
-        "last_stable_mci":last_stable_mci,
-        "last_mci":last_mci
+        "action": "status"
     };
     let ret = await asyncfunc(opt);
     return ret;

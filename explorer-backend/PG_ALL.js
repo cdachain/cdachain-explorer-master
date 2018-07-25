@@ -31,7 +31,7 @@ PG.prototype.getConnection = function () {
 };
 PG.prototype.query = function (sqlStr, values, cb) {
     var typeVal = Object.prototype.toString.call(values);
-    console.log(`RUN=> client.query(${sqlStr} , ${values} ) `)
+    // console.log(`RUN=> client.query(${sqlStr} , ${values} ) `)
     if (typeVal == "[object Function]") {
         //查
         cb = values;

@@ -86,6 +86,52 @@ const blockValues = [
     1530719789
 ]
 
+
 pgclient.query(blockText,blockValues,(res)=>{
     console.log("select result",res)
 });
+
+
+//查看 
+/* 
+pgclient.query("Select * FROM accounts  WHERE account = $1", ['czr_1ozdqi5yzzgm9wwbb58kt86635uygnaxksh4w1nmqo1z6hpxm5cetogpgpq9'], (data) => {
+    console.log("/get_account", data.length)
+
+}); 
+*/
+
+//  插入
+//RUN=> client.query(INSERT INTO accounts(account,type,tran_count,balance) VALUES($1,$2,$3,$4) , czr_1ozdqi5yzzgm9wwbb58kt86635uygnaxksh4w1nmqo1z6hpxm5cetogpgpqi,1,2,1234567890.1234567 )
+// const accountText = 'INSERT INTO accounts(account,type,tran_count,balance) VALUES($1,$2,$3,$4)'
+// const accountValues = [
+//     'czr_3b7zjk1uuorkjgsxkyhr6nadm8uba74q1si3himeqasfsotrikfs8xqiwibe', 
+//     1,
+//     2,
+//     "1"
+// ]
+// pgclient.query(accountText,accountValues,(res)=>{
+//     console.log("select result",res)
+// });
+
+//更新
+//client.query("UPDATE test SET age=$1 WHERE name=$2", [21, "xiaoming"])
+/* 
+client.query("UPDATE accounts SET type=$2,balance=$3,tran_count=$4, WHERE name=$1" , [
+    "czr_1ozdqi5yzzgm9wwbb58kt86635uygnaxksh4w1nmqo1z6hpxm5cetogpgpqi",
+    1,
+    "1688",
+    99
+] )  
+*/
+
+
+/* const updateText = "UPDATE accounts SET type=$2,balance=$3,tran_count=$4, WHERE name=$1";
+const updateValues = [
+    "czr_1ozdqi5yzzgm9wwbb58kt86635uygnaxksh4w1nmqo1z6hpxm5cetogpgpqi",
+    1,
+    "1688",
+    99
+]
+pgclient.query(updateText, updateValues, (res) => {
+    console.log("updateText", res)
+}); */
