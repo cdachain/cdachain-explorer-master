@@ -13,7 +13,7 @@
                         <el-table :data="database" style="width: 100%">
                             <el-table-column label="时间" width="180">
                                 <template slot-scope="scope">
-                                    <span class="table-long-item">{{scope.row.mc_timestamp | toDate}}</span>
+                                    <span class="table-long-item">{{scope.row.exec_timestamp | toDate}}</span>
                                 </template>
                             </el-table-column>
                             <el-table-column label="交易号" width="220">

@@ -24,35 +24,20 @@ let pageUtility = {
             last_stable_mci = status.status.last_stable_mci;
             last_mci = status.status.last_mci;
             console.log("STATUS", last_stable_mci, last_mci);
-            var mciBlocksAry = [];
-            var blockInfo;
-            //1、查询所有稳定 block 信息
             var getMciBlocks = function () {
+                //1、查询 block 信息
                 czr.request.mciBlocks(local_stable_mci).then(function (data) {
-                    mciBlocksAry.push(data.blocks[0]);
+                    var blockInfo = data.blocks[0];
+                    //2、储存到trans action 表中
+                    pageUtility.insertTransSQL(blockInfo, true)
 
+                    //TODO 增加account 
+                    //更新 from 和 to 的金额
                     local_stable_mci++
-                    // if (local_stable_mci <= last_stable_mci) {
-                    if (local_stable_mci <= 20) {
+                    if (local_stable_mci <= 10) {
                         getMciBlocks();
                     } else {
-
-                        //2、整理稳定并且储存,储存到trans action 表中
-                        mciBlocksAry.sort(function (a, b) {
-                            return Number(a.level) - Number(b.level);
-                        });
-                        pgclient.query('BEGIN', (err) => {
-                            console.log("稳定 BEGIN");
-                            mciBlocksAry.forEach(blockInfo => {
-                                console.log(blockInfo.level)
-                                pageUtility.insertTransSQL(blockInfo, true);
-                            })
-                            pgclient.query('COMMIT', (err) => {
-                                console.log("稳定 COMMIT");
-                            })
-                        })
-
-                        //最后：获取 不稳定的unstable_blocks 存储
+                        //获取unstable_blocks存储
                         czr.request.unstableBlocks().then(function (data) {
                             var unstableBlocksAry = data.blocks;
                             //排序 level 由小到大
@@ -60,13 +45,14 @@ let pageUtility = {
                                 return Number(a.level) - Number(b.level);
                             });
                             pgclient.query('BEGIN', (err) => {
-                                console.log("不稳定 BEGIN");
+                                console.log("BEGIN");
                                 unstableBlocksAry.forEach(blockInfo => {
-                                    console.log(blockInfo.level)
+                                    console.log(blockInfo.level, blockInfo.hash)
                                     pageUtility.insertTransSQL(blockInfo);
+                                    // pageUtility.insertParentsSQL(blockInfo);
                                 })
                                 pgclient.query('COMMIT', (err) => {
-                                    console.log("不稳定 COMMIT");
+                                    console.log("COMMIT");
                                 })
                             })
                         })
@@ -74,6 +60,28 @@ let pageUtility = {
                 })
             }
             getMciBlocks();
+            //继续执行
+            //获取 稳定的 并且储存
+
+            //获取 不稳定的unstable_blocks 存储
+            // czr.request.unstableBlocks().then(function (data) {
+            //     var unstableBlocksAry = data.blocks;
+            //     //排序 level 由小到大
+            //     unstableBlocksAry.sort(function (a, b) {
+            //         return Number(a.level) - Number(b.level);
+            //     });
+            //     pgclient.query('BEGIN', (err) => {
+            //         console.log("BEGIN");
+            //         unstableBlocksAry.forEach(blockInfo => {
+            //             console.log(blockInfo.level, blockInfo.hash)
+            //             pageUtility.insertTransSQL(blockInfo);
+            //             // pageUtility.insertParentsSQL(blockInfo);
+            //         })
+            //         pgclient.query('COMMIT', (err) => {
+            //             console.log("COMMIT");
+            //         })
+            //     })
+            // })
         })
     },
     insertTransSQL(blockInfo, isUpdateToAcc) {
@@ -108,8 +116,7 @@ let pageUtility = {
         pgclient.query(addBlockSQL, (res) => {
             var typeVal = Object.prototype.toString.call(res);
             if (typeVal == "[object Error]") {
-                // console.log("insertTrans => ", res);
-                console.log("insertTrans ERROR ");
+                console.log("insertTrans => ", res);
             } else if (typeVal == '[object Array]') {
                 //3、查看block.to账号有没有
                 if (isUpdateToAcc) {
@@ -152,20 +159,25 @@ let pageUtility = {
                     tran_count: (oldAccountInfo.tran_count + 1)
                 }
                 pageUtility.updateAccountFn(blockInfo.to, updateAccountInfo.balance, updateAccountInfo.tran_count);
+
             } else {
                 //如果不存在 新建account
                 pageUtility.addAccount(blockInfo.to, blockInfo.amount, blockInfo)
             }
         });
     },
-    getFromAccount(blockInfo, isSelf) {
+    getFromAccount(blockInfo) {
         const getFromAccountSQL = { text: "Select * FROM accounts  WHERE account = $1", values: [blockInfo.from] }
         pgclient.query(getFromAccountSQL, (data) => {
             if (data.length) {
                 const fromAccountInfo = data[0];
-                var updateFromAccountInfo={
+                const updateFromAccountInfo = {
                     balance: BigNumber(fromAccountInfo.balance).minus(blockInfo.amount).toString(10),
                     tran_count: (fromAccountInfo.tran_count + 1)
+                }
+                if (blockInfo.amount != '0') {
+                    console.log("=====> ", data, fromAccountInfo.balance, blockInfo.amount)
+
                 }
                 pageUtility.updateAccountFn(blockInfo.from, updateFromAccountInfo.balance, updateFromAccountInfo.tran_count);
             } else {

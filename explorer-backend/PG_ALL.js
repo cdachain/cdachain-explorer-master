@@ -2,7 +2,7 @@ const { Client } = require('pg')
 
 // 数据库配置
 let config = {
-    host: '*,*,*,*',
+    host: '192.168.10.222',
     port: 5432,
     user: "postgres",
     password: "abc123456",

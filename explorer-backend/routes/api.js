@@ -140,6 +140,12 @@ router.get("/get_account_list", function (req, res, next) {
                     } else {
                         item.is_from_this_account = false;
                     }
+                    //是否转给自己
+                    if (item.from == item.to) {
+                        item.is_to_self = true;
+                    } else{
+                        item.is_to_self = false;
+                    }
                 })
                 res.json(responseData);
             }

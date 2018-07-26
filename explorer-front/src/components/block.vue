@@ -49,13 +49,17 @@
                         <strong class="bui-dlist-tit">发款方
                             <span class="space-des"></span>
                         </strong>
-                        <div class="bui-dlist-det">{{blockInfo.from || '-'}}</div>
+                        <div class="bui-dlist-det">
+                            <router-link :to="'/account/'+blockInfo.from">{{blockInfo.from || '-'}}</router-link>
+                        </div>
                     </div>
                     <div class="block-item-des">
                         <strong class="bui-dlist-tit">收款方
                             <span class="space-des"></span>
                         </strong>
-                        <div class="bui-dlist-det">{{blockInfo.to || '-'}}</div>
+                        <div class="bui-dlist-det">
+                            <router-link  :to="'/account/'+blockInfo.to">{{blockInfo.to || '-'}}</router-link>
+                        </div>
                     </div>
                     <div class="block-item-des">
                         <strong class="bui-dlist-tit">金额

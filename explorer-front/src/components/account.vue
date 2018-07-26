@@ -32,14 +32,14 @@
                                         <span class="table-long-item">{{scope.row.exec_timestamp | toDate}}</span>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="交易号" width="220">
+                                <el-table-column label="交易号" width="200">
                                     <template slot-scope="scope">
                                         <el-button @click="goBlockPath(scope.row.hash)" type="text">
                                             <span class="table-long-item">{{scope.row.hash}}</span>
                                         </el-button>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="发款方" width="220">
+                                <el-table-column label="发款方" width="210">
                                     <template slot-scope="scope">
                                         <template v-if="scope.row.is_from_this_account == false">
                                             <el-button @click="goAccountPath(scope.row.from)" type="text">
@@ -51,28 +51,30 @@
                                         </template>
                                     </template>
                                 </el-table-column>
-                                <el-table-column width="80">
+                                <el-table-column >
                                     <template slot-scope="scope">
                                         <span>
-                                            <el-button v-if="scope.row.is_from_this_account == true"  type="warning" size="mini">转出</el-button>
+                                            <el-button v-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == false)" type="warning" size="mini">转出</el-button>
+                                            <el-button v-else-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == true)" size="mini">
+                                                <i class="el-icon-sort trans-to-self"></i>
+                                            </el-button>
                                             <el-button v-else type="success" size="mini">转入</el-button>
                                         </span>
-
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="收款方" width="220">
+                                <el-table-column label="收款方" width="210">
                                     <template slot-scope="scope">
-                                        <template v-if="scope.row.is_from_this_account == true">
-                                        <el-button @click="goAccountPath(scope.row.to)" type="text">
-                                            <span class="table-long-item">{{scope.row.to}}</span>
-                                        </el-button>
+                                        <template v-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == false)">
+                                            <el-button @click="goAccountPath(scope.row.to)" type="text">
+                                                <span class="table-long-item">{{scope.row.to}}</span>
+                                            </el-button>
                                         </template>
                                         <template v-else>
                                             <span class="table-long-item">{{scope.row.to}}</span>
                                         </template>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="金额 / CZR" align="right">
+                                <el-table-column label="金额 / CZR" width="220" align="right">
                                     <template slot-scope="scope">
                                         <span class="table-long-item">{{scope.row.amount}}</span>
                                     </template>
@@ -127,7 +129,7 @@ export default {
             loadingSwitch: true,
 
             currentPage: 1,
-            limitVal: 2,
+            limitVal: 20,
             totalVal: 0
         };
     },
@@ -453,5 +455,13 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.trans-to-self {
+    transform: rotate(90deg);
+    -ms-transform: rotate(90deg); /* IE 9 */
+    -moz-transform: rotate(90deg); /* Firefox */
+    -webkit-transform: rotate(90deg); /* Safari 和 Chrome */
+    -o-transform: rotate(90deg); /* Opera */
+    padding: 0 6px;
 }
 </style>
