@@ -171,7 +171,7 @@ router.get("/get_transactions", function (req, res, next) {
         page = Math.max(page, 1);
         OFFSETVAL = (page - 1) * LIMITVAL;
         // *,balance/sum(balance) 
-        pgclient.query("Select * FROM transaction ORDER BY amount DESC LIMIT " + LIMITVAL + " OFFSET " + OFFSETVAL, (data) => {
+        pgclient.query("Select * FROM transaction ORDER BY level DESC LIMIT " + LIMITVAL + " OFFSET " + OFFSETVAL, (data) => {
             //改造数据 排名 , 金额，占比
             var basePage = Number(queryPage) - 1; // 1 2
             var transactions = data;

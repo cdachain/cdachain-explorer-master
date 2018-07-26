@@ -2,7 +2,7 @@ const { Client } = require('pg')
 
 // 数据库配置
 let config = {
-    host: '192.168.10.222',
+    host: '*,*,*,*',
     port: 5432,
     user: "postgres",
     password: "abc123456",
@@ -38,7 +38,7 @@ PG.prototype.query = function (sqlStr, values, cb) {
         client.query(sqlStr,function (err, result) {
             // console.log("result",result) 
             if (err) {
-                cb("error");
+                cb(err);
             } else {
                 if (result.rows != undefined) {
                     cb(result.rows);

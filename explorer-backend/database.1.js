@@ -14,6 +14,26 @@ let last_mci;//2554
 let pageUtility = {
     init() {
         //更新数据
+        // const updateAccount = {
+        //     text: "UPDATE accounts SET balance=$2,tran_count=$3 WHERE account=$1",
+        //     values: [
+        //         'czr_1aptm6u579y1gx548hj7nmehtu3jmduxmp9pwm4abxyiartcd5kd4ofw1dyd',
+        //         '0',
+        //         0
+        //     ]
+        // }
+        // pgclient.query(updateAccount, (res) => {
+        //     console.log("updateAccount", res)
+        // });
+
+        // const queryAccount = {
+        //     text: 'Select * FROM accounts  WHERE account = $1',
+        //     values: ['czr_1aptm6u579y1gx548hj7nmehtu3jmduxmp9pwm4abxyiartcd5kd4ofw1dyd'],
+        // }
+        // pgclient.query(queryAccount, (res) => {
+        //     console.log("select result", res)
+        // });
+
         // this.getRPC()
     },
     getRPC() {
