@@ -15,10 +15,13 @@
                             </el-table-column>
                             <el-table-column label="账户" width="580">
                                 <template slot-scope="scope">
-                                    <el-button @click="handleClick(scope.row.account)" type="text" >{{scope.row.account}}</el-button>
+                                    <el-button @click="handleClick(scope.row.account)" type="text">{{scope.row.account}}</el-button>
                                 </template>
                             </el-table-column>
-                            <el-table-column prop="balance" label="余额(CZR)" align="right" width="180">
+                            <el-table-column label="余额(CZR)" align="right" width="180">
+                                <template slot-scope="scope">
+                                    {{scope.row.balance | toCZRVal}}
+                                </template>
                             </el-table-column>
                             <el-table-column prop="proportion" label="占比" align="right" min-width="150">
                             </el-table-column>
@@ -100,7 +103,12 @@ export default {
             this.$router.push("/account/" + account);
         }
     },
-    filters: {}
+    filters: {
+        toCZRVal: function(val) {
+            let tempVal = self.$czr.utils.fromWei(val, "czr");
+            return parseFloat(tempVal).toFixed(4); //TODO Keep 4 decimal places
+        }
+    }
 };
 </script>
 <style scoped>

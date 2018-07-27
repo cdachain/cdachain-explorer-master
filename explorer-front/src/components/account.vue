@@ -13,7 +13,7 @@
                         <strong class="bui-dlist-tit">余额
                             <span class="space-des"></span>
                         </strong>
-                        <div class="bui-dlist-det">{{accountInfo.balance}} CZR</div>
+                        <div class="bui-dlist-det">{{accountInfo.balance | toCZRVal}} CZR</div>
                     </div>
                     <div class="block-item-des">
                         <strong class="bui-dlist-tit">交易数
@@ -47,16 +47,24 @@
                                             </el-button>
                                         </template>
                                         <template v-else>
-                                            <span class="table-long-item">{{scope.row.from}}</span>
+                                            <template v-if="scope.row.mci <= 0">
+                                                <span class="table-long-item">Gene</span>
+                                            </template>
+                                            <template v-else>
+                                                <span class="table-long-item">{{scope.row.from}}</span>
+                                            </template>
                                         </template>
                                     </template>
                                 </el-table-column>
-                                <el-table-column >
+                                <el-table-column>
                                     <template slot-scope="scope">
                                         <span>
                                             <el-button v-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == false)" type="warning" size="mini">转出</el-button>
-                                            <el-button v-else-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == true)" size="mini">
+                                            <el-button v-else-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == true)&&(scope.row.mci > 0)" size="mini">
                                                 <i class="el-icon-sort trans-to-self"></i>
+                                            </el-button>
+                                            <el-button v-else-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == true)&&(scope.row.mci <= 0)" type="success" size="mini">
+                                                转入
                                             </el-button>
                                             <el-button v-else type="success" size="mini">转入</el-button>
                                         </span>
@@ -76,7 +84,7 @@
                                 </el-table-column>
                                 <el-table-column label="金额 / CZR" width="220" align="right">
                                     <template slot-scope="scope">
-                                        <span class="table-long-item">{{scope.row.amount}}</span>
+                                        <span class="table-long-item">{{scope.row.amount | toCZRVal}}</span>
                                     </template>
                                 </el-table-column>
                             </el-table>

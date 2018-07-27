@@ -27,7 +27,18 @@ pre,code,tt{font:12px 'andale mono', 'lucida console', monospace;line-height:1.5
 .clearfix:after {content:"\0020"; display: block; height: 0;clear: both; visibility: hidden; }
 .clearfix {zoom: 1;}
 
-
+.txt-warning {
+  color: #e6a23c;
+}
+.txt-info {
+  color: #909399;
+}
+.txt-success {
+  color: #67c23a;
+}
+.txt-danger {
+  color: #f56c6c;
+}
 
 /* Links */
 a {

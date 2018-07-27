@@ -43,7 +43,7 @@ router.get("/get_accounts", function (req, res, next) {
             var accounts = data;
             accounts.forEach((element, index) => {
                 //占比 element.balance / 1618033988
-                element.proportion = ((element.balance / (1618033988)) * 100).toFixed(10) + "%";
+                element.proportion = ((element.balance / (1600000000*1000000000000000000)) * 100).toFixed(10) + " %";
                 //并保留6位精度
                 let tempVal = element.balance
                 var reg = /(\d+(?:\.)?)(\d{0,6})/;
@@ -143,7 +143,7 @@ router.get("/get_account_list", function (req, res, next) {
                     //是否转给自己
                     if (item.from == item.to) {
                         item.is_to_self = true;
-                    } else{
+                    } else {
                         item.is_to_self = false;
                     }
                 })
@@ -200,8 +200,12 @@ router.get("/get_transaction", function (req, res, next) {
     var queryTransaction = req.query.transaction;// ?account=2
     pgclient.query("Select * FROM transaction  WHERE hash = $1", [queryTransaction], (data) => {
         console.log("/get_transaction", queryTransaction, data)
-        if (data != "error") {
+        if ((data != "error") && (data.length != 0)) {
             responseData.transaction = data[0];
+            res.json(responseData);
+        } else if (data.length == 0) {
+            responseData.code = 404;
+            responseData.message = "error";
             res.json(responseData);
         } else {
             responseData.code = 400;

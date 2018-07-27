@@ -58,7 +58,7 @@
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">
-                            <router-link  :to="'/account/'+blockInfo.to">{{blockInfo.to || '-'}}</router-link>
+                            <router-link :to="'/account/'+blockInfo.to">{{blockInfo.to || '-'}}</router-link>
                         </div>
                     </div>
                     <div class="block-item-des">
@@ -139,26 +139,30 @@ export default {
                     }
                 })
                 .then(function(response) {
-                    self.blockInfo = response.data.transaction;
-                    if (self.blockInfo.is_stable == false) {
-                        //不稳定
-                        self.txStatus = -1; //不稳定
-                    } else if (self.blockInfo.is_stable == true) {
-                        //稳定
-                        if (
-                            self.blockInfo.is_fork == true ||
-                            self.blockInfo.is_invalid == true
-                        ) {
-                            self.txStatus = 300; //作废
-                            //
-                        } else {
-                            if (self.blockInfo.is_fail == true) {
-                                self.txStatus = 400; //失败
+                    console.log("response.data.message ",response.data.message )
+                    if (response.data.message != "error") {
+                        self.blockInfo = response.data.transaction;
+                        if (self.blockInfo.is_stable == false) {
+                            //不稳定
+                            self.txStatus = -1; //不稳定
+                        } else if (self.blockInfo.is_stable == true) {
+                            //稳定
+                            if (
+                                self.blockInfo.is_fork == true ||
+                                self.blockInfo.is_invalid == true
+                            ) {
+                                self.txStatus = 300; //作废
+                                //
                             } else {
-                                self.txStatus = 200; //成功
+                                if (self.blockInfo.is_fail == true) {
+                                    self.txStatus = 400; //失败
+                                } else {
+                                    self.txStatus = 200; //成功
+                                }
                             }
                         }
                     }
+
                     self.loadingSwitch = false;
                 })
                 .catch(function(error) {
@@ -280,19 +284,6 @@ export default {
         word-break: break-all;
         overflow: hidden;
     }
-}
-
-.txt-warning {
-    color: #e6a23c;
-}
-.txt-info {
-    color: #909399;
-}
-.txt-success {
-    color: #67c23a;
-}
-.txt-danger {
-    color: #f56c6c;
 }
 
 .bui-dlist-tit .space-des {
