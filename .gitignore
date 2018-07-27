@@ -6,6 +6,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 explorer-backend/node_modules/
+explorer-backend/PG_ALL.js
 explorer-front/node_modules/
 explorer-front/dist/
 explorer-front/npm-debug.log*
