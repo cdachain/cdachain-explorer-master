@@ -47,8 +47,8 @@ let pageUtility = {
                 })
                 local_stable_mci++
 
-                // if (local_stable_mci <= last_stable_mci) {
-                if (local_stable_mci <= 20) {
+                if (local_stable_mci <= last_stable_mci) {
+                // if (local_stable_mci <= 20) {
                     getMciBlocks();
                 } else {
                     //TODO 插入顺序整理
@@ -183,10 +183,6 @@ let pageUtility = {
                 Number(blockInfo.latest_included_mci) || 0,
                 Number(blockInfo.mc_timestamp),
             ],
-        }
-        if(!Number(blockInfo.mci)){
-            console.log("Number(blockInfo.mci) || -1",Number(blockInfo.mci))
-
         }
         pgclient.query(addBlockSQL, (res) => {
         })

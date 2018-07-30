@@ -25,7 +25,7 @@
         </div>
         <!-- Header End -->
         <div id="infoMessage" onclick="hideInfoMessage()">InfoMessage</div>
-        <div id="cy"></div>
+        <div id="cy" v-loading="loadingSwitch"></div>
         <div id="goToTop">
             <!-- <i class="el-icon-upload2"></i> -->
             <div id="titleGoToTop">
@@ -166,8 +166,11 @@ var scrollTopPos = 0,
 
 var _cy; //cyto scape
 var nodes, edges;
-var firstUnit, //第一单元
-    lastUnit, //最后单元
+var firstPkid,
+    lastPkid,
+    // firstUnit, //第一单元
+    // lastUnit, //最后单元
+
     phantoms = {},
     phantomsTop = {},
     notStable = []; //不稳定Unit的列表
@@ -238,39 +241,47 @@ export default {
         },
         firstGetUnit() {
             self.$axios
-                .get("/api/get_dag_units", {
-                    params: {
-                        xxx: ""
-                    }
-                })
+                .get("/api/get_previous_units")
                 .then(function(response) {
-                    self.database.nodes = response.data.units.nodes;
-                    self.database.edges = response.data.units.edges;
+                    // self.database.nodes = response.data.units.nodes;
+                    // self.database.edges = response.data.units.edges;
+                    // self.init(self.database);
+                    nodes = response.data.units.nodes;
+                    edges = response.data.units.edges;
                     self.loadingSwitch = false;
-                    self.init(self.database);
+
+                    notLastUnitDown = true;
+                    if (bWaitingForHighlightNode) {
+                        bWaitingForHighlightNode = false;
+                    }
+                    self.init(nodes, edges);
                 })
                 .catch(function(error) {
                     self.loadingSwitch = false;
                 });
         },
         getPreUnit(data) {
+            //next_pkid
             //AJAX获取上一段 data
             if (bWaitingForHighlightNode) {
                 bWaitingForHighlightNode = false;
             }
             if (data.nodes.length) {
+                console.log("start", nodes.length);
                 nodes = [].concat(data.nodes, nodes);
+                console.log("end", nodes.length);
                 for (var k in data.edges) {
                     if (data.edges.hasOwnProperty(k)) {
                         edges[k] = data.edges[k];
                     }
                 }
-                firstUnit = data.nodes[0].rowid;
-                setNew(data.nodes, data.edges);//设置最新
+                // firstUnit = data.nodes[0].rowid;
+                firstPkid = data.nodes[0].pkid;
+                self.setNew(data.nodes, data.edges); //设置最新
             }
             bWaitingForPrev = false;
             if (data.end === true) {
-                notLastUnitUp = false;//不是上移最后一个 置为false，这时候已经没有最新数据了
+                notLastUnitUp = false; //不是上移最后一个 置为false，这时候已经没有最新数据了
             }
             if (waitGo) {
                 highlightNode(waitGo);
@@ -279,9 +290,9 @@ export default {
             // setChangesStableUnits(data.arrStableUnits);//不稳定的单元置为稳定的
         },
 
-
-        init(wsData) {
-            self.initDate(wsData.nodes, wsData.edges);
+        init(nodes, edges) {
+            self.initDate(nodes, edges);
+            // self.initDate(wsData.nodes, wsData.edges);
             notLastUnitDown = true;
             if (bWaitingForHighlightNode) {
                 bWaitingForHighlightNode = false;
@@ -291,8 +302,10 @@ export default {
         initDate(_nodes, _edges) {
             nodes = _nodes;
             edges = _edges;
-            firstUnit = nodes[0].rowid;
-            lastUnit = nodes[nodes.length - 1].rowid;
+            // firstUnit = nodes[0].rowid;
+            // lastUnit = nodes[nodes.length - 1].rowid;
+            firstPkid = nodes[0].pkid;
+            lastPkid = nodes[nodes.length - 1].pkid;
             phantoms = {};
             phantomsTop = {};
             notStable = [];
@@ -338,7 +351,9 @@ export default {
             });
 
             //上下键滚动
-            window.addEventListener("keydown", function(e) {
+            window.addEventListener(
+                "keydown",
+                function(e) {
                     if (page == "dag") {
                         if (e.keyCode == 38) {
                             e.preventDefault();
@@ -506,9 +521,10 @@ export default {
             });
 
             //拖动事件
-            _cy.on("pan", function() {
+            _cy.on("pan", function(e) {
                 var ext = _cy.extent();
                 if (nextPositionUpdates < ext.y2) {
+                    self.loadingSwitch = true;
                     self.getNext();
                 } else if (
                     notLastUnitUp === true &&
@@ -526,6 +542,7 @@ export default {
                     e.originalEvent.wheelDeltaY || -e.originalEvent.deltaY;
                 if (page == "dag") {
                     e.preventDefault();
+                    console.log("2222", deltaY,e.originalEvent.wheelDeltaY,-e.originalEvent.deltaY);
                     if (deltaY > 0) {
                         self.scrollUp();
                     } else if (deltaY < 0) {
@@ -690,7 +707,7 @@ export default {
                 _node,
                 classes = "",
                 pos_iomc;
-            var graph = createGraph(_nodes, _edges);
+            var graph = self.createGraph(_nodes, _edges);
             graph.nodes().forEach(function(unit) {
                 _node = graph.node(unit);
                 if (_node) {
@@ -804,8 +821,44 @@ export default {
         getNext: function() {
             console.log(`获取下一个节点 ${!bWaitingForNext} ${isInit} `);
             if (!bWaitingForNext && isInit) {
-                // socket.emit('next', { last: lastUnit, notStable: notStable });
                 bWaitingForNext = true;
+                self.$axios
+                    .get("/api/get_previous_units", {
+                        params: {
+                            next_pkid: lastPkid
+                        }
+                    })
+                    .then(function(response) {
+                        self.loadingSwitch = false;
+                        console.log("response.data", response.data);
+                        var responseData = response.data.units;
+                        // self.getPreUnit(response.data.units);
+
+                        if (notLastUnitDown) {
+                            if (bWaitingForHighlightNode)
+                                bWaitingForHighlightNode = false;
+                            nodes = nodes.concat(responseData.nodes);
+                            for (var k in responseData.edges) {
+                                if (responseData.edges.hasOwnProperty(k)) {
+                                    edges[k] = responseData.edges[k];
+                                }
+                            }
+                            lastPkid = nodes[nodes.length - 1].pkid;
+                            self.generate(
+                                responseData.nodes,
+                                responseData.edges
+                            );
+                            bWaitingForNext = false;
+                            if (waitGo) {
+                                self.highlightNode(waitGo);
+                                waitGo = false;
+                            }
+                            if (responseData.nodes.length === 0) {
+                                notLastUnitDown = false;
+                            }
+                            // setChangesStableUnits(response.data.arrStableUnits);
+                        }
+                    });
             }
         },
         getPrev: function() {
@@ -927,13 +980,6 @@ export default {
             if (!posTop) {
                 posTop = $scroll.scrollTop();
             }
-            console.log(
-                "posTop",
-                $scroll.height() / 2,
-                scrollTopPos,
-                posTop,
-                $scroll.height() / 2 - scrollTopPos - posTop
-            );
             return $scroll.height() / 2 - scrollTopPos - posTop;
         },
 
