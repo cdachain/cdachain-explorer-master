@@ -89,7 +89,7 @@
                                 </el-table-column>
                             </el-table>
                             <div class="pagin-block">
-                                <el-pagination background layout="total,prev, pager, next" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="limitVal" :total="totalVal">
+                                <el-pagination   small background layout="total,prev, pager, next" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="limitVal" :total="totalVal" :pager-count="5">
                                 </el-pagination>
                             </div>
                         </template>

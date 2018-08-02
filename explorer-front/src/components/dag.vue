@@ -24,10 +24,10 @@
             </div>
         </div>
         <!-- Header End -->
-        <div id="infoMessage" onclick="hideInfoMessage()">InfoMessage</div>
+
+        <!-- <div id="infoMessage" onclick="hideInfoMessage()">InfoMessage</div> -->
         <div id="cy" v-loading="loadingSwitch"></div>
         <div id="goToTop">
-            <!-- <i class="el-icon-upload2"></i> -->
             <div id="titleGoToTop">
                 <i class="el-icon-arrow-up"></i>
             </div>
@@ -35,123 +35,114 @@
         <div id="scroll">
             <div id="scrollBody">&nbsp;</div>
         </div>
-        <div id="info" class="hideInfoBlock">
-            <div id="infoClose">
-                <a href="javascript:" onclick="closeInfo()">Close</a>
-            </div>
+        <div id="info" class="hideInfoBlock" v-loading="loadingInfoSwitch">
             <div id="defaultInfo">点击左侧单元可查看详情</div>
             <div id="listInfo">
+                <div class="info-item-dev">
+                    <strong>Hash</strong>:
+                    <span>{{activeUnitInfo.hash}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Level</strong>:
+                    <span>{{activeUnitInfo.level}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>From</strong>:
+                    <span>{{activeUnitInfo.from}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>To</strong>:
+                    <span>{{activeUnitInfo.to}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Amount</strong>:
+                    <span>{{activeUnitInfo.amount | toCZRVal}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Exec Time</strong>:
+                    <span>{{activeUnitInfo.exec_timestamp | toDate}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Mc Time</strong>:
+                    <span>{{activeUnitInfo.mc_timestamp | toDate}}</span>
+                </div>
+
                 <div>
-                    <div id="unitParent">Unit
-                        <span id="unit"></span>
+                    <div class="infoTitle">Parents</div>
+                    <div class="info-item-dev" v-for="item in activeUnitInfo.parents">
+                        <a href="javascript:;" @click="goParentHash(item.parent)">{{ item.parent }}</a>
                     </div>
                 </div>
                 <div>
-                    <div style="padding-left: 5px">Received:
-                        <span id="received"></span>
-                    </div>
-                </div>
-                <div>
-                    <div class="infoTitle" onclick="showHideBlock(event, 'authors')">Authors
-                        <div class="infoTitleImg"></div>
-                    </div>
-                    <div id="authors"></div>
-                </div>
-                <div>
-                    <div class="infoTitle" onclick="showHideBlock(event, 'children')">Children
-                        <div class="infoTitleImg"></div>
-                    </div>
-                    <div id="children"></div>
-                </div>
-                <div>
-                    <div class="infoTitle" onclick="showHideBlock(event, 'parents')">Parents
-                        <div class="infoTitleImg"></div>
-                    </div>
-                    <div id="parents"></div>
-                </div>
-                <div>
-                    <div class="infoTitle" id="divTitleMessage" onclick="showHideBlock(event, 'messages')">Messages
-                        <div class="infoTitleImg"></div>
-                    </div>
-                    <div id="messages"></div>
-                </div>
-                <div>
-                    <div class="infoTitle hideTitle" id="witnessesTitle" onclick="showHideBlock(event, 'witnesses')">
-                        Witnesses
-                        <div class="infoTitleImg"></div>
-                    </div>
-                    <div id="witnesses" style="display: none"></div>
-                </div>
-                <div>
-                    <div class="infoTitle" onclick="showHideBlock(event, 'otherInfo')">Technical information
-                        <div class="infoTitleImg"></div>
-                    </div>
-                    <div id="otherInfo">
-                        <div id="divFees">Fees:
-                            <span id="fees"></span>
+                    <div class="infoTitle">Other Info</div>
+                    <div class="otherInfo">
+                        <div class="info-item-dev">
+                            <strong>Previous</strong>:
+                            <span>{{activeUnitInfo.previous}}</span>
                         </div>
-                        <div>Level:
-                            <span id="level"></span>
+                        <div class="info-item-dev">
+                            <strong>Witness List Block</strong>:
+                            <span>{{activeUnitInfo.witness_list_block}}</span>
                         </div>
-                        <div>Witnessed level:
-                            <span id="witnessed_level"></span>
+                        <div class="info-item-dev">
+                            <strong>Last Summary</strong>:
+                            <span>{{activeUnitInfo.last_summary}}</span>
                         </div>
-                        <div>Last ball unit:
-                            <span id="last_ball_unit"></span>
+                        <div class="info-item-dev">
+                            <strong>Last Summary Block</strong>:
+                            <span>{{activeUnitInfo.last_summary_block}}</span>
                         </div>
-                        <div>Main chain index:
-                            <span id="main_chain_index"></span>
+                        <div class="info-item-dev">
+                            <strong>Signature</strong>:
+                            <span>{{activeUnitInfo.signature}}</span>
                         </div>
-                        <div>Latest included mc index:
-                            <span id="latest_included_mc_index"></span>
+                        <div class="info-item-dev">
+                            <strong>Is Free</strong>:
+                            <span>{{activeUnitInfo.is_free}}</span>
                         </div>
-                        <div>Is stable:
-                            <span id="is_stable"></span>
+                        <div class="info-item-dev">
+                            <strong>Witnessed Level</strong>:
+                            <span>{{activeUnitInfo.witnessed_level}}</span>
+                        </div>
+                        <div class="info-item-dev">
+                            <strong>Best Parent</strong>:
+                            <span>{{activeUnitInfo.best_parent}}</span>
+                        </div>
+                        <div class="info-item-dev">
+                            <strong>Is Stable</strong>:
+                            <span>{{activeUnitInfo.is_stable}}</span>
+                        </div>
+                        <div class="info-item-dev">
+                            <strong>Is Fork</strong>:
+                            <span>{{activeUnitInfo.is_fork}}</span>
+                        </div>
+                        <div class="info-item-dev">
+                            <strong>Is Invalid</strong>:
+                            <span>{{activeUnitInfo.is_invalid}}</span>
+                        </div>
+                        <div class="info-item-dev">
+                            <strong>Is Fail</strong>:
+                            <span>{{activeUnitInfo.is_fail}}</span>
+                        </div>
+                        <div class="info-item-dev">
+                            <strong>Is On Mc</strong>:
+                            <span>{{activeUnitInfo.is_on_mc}}</span>
+                        </div>
+                        <div class="info-item-dev">
+                            <strong>Mci</strong>:
+                            <span>{{activeUnitInfo.mci}}</span>
+                        </div>
+                        <div class="info-item-dev">
+                            <strong>Latest Included Mci</strong>:
+                            <span>{{activeUnitInfo.latest_included_mci}}</span>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        <div id="addressInfo">
-            <div id="addressClose" class="row">
-                <a href="javascript:" onclick="closeAddress()">Close</a>
-            </div>
-            <div class="row" id="infoAndBalanceAddress">
-                <div style="margin-bottom: 10px;font-weight: bold">
-                    <div>
-                        <span id="address"></span>
-                    </div>
-                </div>
-                <div>
-                    <div id="balance"></div>
-                </div>
-                <div class="infoTitle hideTitle" id="definitionTitleInAddress" onclick="showHideBlock(event, 'definition')" style="display: none">
-                    Definition
-                    <div class="infoTitleImg"></div>
-                </div>
-                <div id="definition" style="display: none"></div>
-            </div>
-            <div class="row" id="blockListUnspent" style="margin-top: 50px">
-                <div class="infoTitle" onclick="showHideBlock(event, 'listUnspent')">
-                    Unspent
-                    <div class="infoTitleImg"></div>
-                </div>
-                <div id="listUnspent"></div>
-            </div>
-            <div class="row" style="margin-top: 50px">
-                <div class="infoTitle" id="titleListTransactions" style="display: none" onclick="showHideBlock(event, 'tableListTransactions')">
-                    Transactions
-                    <div class="infoTitleImg"></div>
-                </div>
-                <table id="tableListTransactions">
-                    <tbody id="listUnits"></tbody>
-                </table>
             </div>
         </div>
     </div>
 </template>
 <script>
-import HeaderCps from "@/components/Header/Header";
 import $ from "jquery";
 
 var $page;
@@ -196,11 +187,12 @@ var bWaitingForNext = false,
     bWaitingForNew = false,
     bHaveDelayedNewRequests = false,
     bWaitingForPrev = false,
-    bWaitingForHighlightNode = false, //等待高亮节点
-    bWaitingForNextPageTransactions = false;
-var nextPageTransactionsEnd = false,
-    lastInputsROWID = 0,
-    lastOutputsROWID = 0;
+    bWaitingForHighlightNode = false; //等待高亮节点
+
+// var bWaitingForNextPageTransactions = false;
+// var nextPageTransactionsEnd = false,
+//     lastInputsROWID = 0,
+//     lastOutputsROWID = 0;
 //websocket
 
 //timer
@@ -208,24 +200,52 @@ var timerInfoMessage;
 var self;
 export default {
     name: "Dag",
-    components: {
-        HeaderCps
-    },
+    components: {},
     data() {
         return {
             searchVal: "",
             loadingSwitch: true,
+            loadingInfoSwitch: false,
             activeUnit: "",
+            activeUnitInfo: {
+                pkid: "-",
+                hash: "-",
+                from: "-",
+                to: "-",
+                amount: "0",
+                previous: "-",
+                witness_list_block: "-",
+                last_summary: "-",
+                last_summary_block: "-",
+                data: "",
+                exec_timestamp: "0",
+                signature: "-",
+                is_free: false,
+                level: "1",
+                witnessed_level: "1",
+                best_parent: "-",
+                is_stable: true,
+                is_fork: false,
+                is_invalid: false,
+                is_fail: false,
+                is_on_mc: true,
+                mci: "-",
+                latest_included_mci: "-",
+                mc_timestamp: "0",
+                parents: []
+            },
             database: {
                 nodes: [],
                 edges: {}
             }
         };
     },
-    mounted() {
+    created() {
         self = this;
+    },
+    mounted() {
         self.initVar();
-        this.firstGetUnit();
+        this.start();
     },
     methods: {
         initVar() {
@@ -238,56 +258,6 @@ export default {
             $defaultInfo = $("#defaultInfo");
             $listInfo = $("#listInfo");
             $addressInfo = $("#addressInfo");
-        },
-        firstGetUnit() {
-            self.$axios
-                .get("/api/get_previous_units")
-                .then(function(response) {
-                    // self.database.nodes = response.data.units.nodes;
-                    // self.database.edges = response.data.units.edges;
-                    // self.init(self.database);
-                    nodes = response.data.units.nodes;
-                    edges = response.data.units.edges;
-                    self.loadingSwitch = false;
-
-                    notLastUnitDown = true;
-                    if (bWaitingForHighlightNode) {
-                        bWaitingForHighlightNode = false;
-                    }
-                    self.init(nodes, edges);
-                })
-                .catch(function(error) {
-                    self.loadingSwitch = false;
-                });
-        },
-        getPreUnit(data) {
-            //next_pkid
-            //AJAX获取上一段 data
-            if (bWaitingForHighlightNode) {
-                bWaitingForHighlightNode = false;
-            }
-            if (data.nodes.length) {
-                console.log("start", nodes.length);
-                nodes = [].concat(data.nodes, nodes);
-                console.log("end", nodes.length);
-                for (var k in data.edges) {
-                    if (data.edges.hasOwnProperty(k)) {
-                        edges[k] = data.edges[k];
-                    }
-                }
-                // firstUnit = data.nodes[0].rowid;
-                firstPkid = data.nodes[0].pkid;
-                self.setNew(data.nodes, data.edges); //设置最新
-            }
-            bWaitingForPrev = false;
-            if (data.end === true) {
-                notLastUnitUp = false; //不是上移最后一个 置为false，这时候已经没有最新数据了
-            }
-            if (waitGo) {
-                highlightNode(waitGo);
-                waitGo = false;
-            }
-            // setChangesStableUnits(data.arrStableUnits);//不稳定的单元置为稳定的
         },
 
         init(nodes, edges) {
@@ -335,18 +305,16 @@ export default {
         },
 
         bind: function() {
-            var self = this;
             //hash改变时触发
             window.addEventListener("hashchange", function() {
                 self.activeUnit = location.hash.substr(6);
-                if (self.activeUnit.length == 44) {
+                console.log("self.activeUnit", self.activeUnit, location.hash);
+                if (self.activeUnit.length == 64) {
                     self.highlightNode(self.activeUnit);
                     //隐藏显示的面板
                     if ($addressInfo.css("display") == "block") {
                         $addressInfo.hide();
                     }
-                } else if (self.activeUnit.length == 32) {
-                    // socket.emit('start', { type: 'address', address: self.activeUnit });
                 }
             });
 
@@ -393,8 +361,41 @@ export default {
             });
         },
 
+        start() {
+            if (
+                location.hash.indexOf("#/dag") > -1 &&
+                location.hash.length != 70
+            ) {
+                self.getStar();
+            } else if (location.hash.length == 70) {
+                notLastUnitUp = true;
+                self.getStar(location.hash.substr(6));
+            }
+        },
+        getStar(searchUnit) {
+            self.loadingSwitch = true;
+            self.$axios
+                .get("/api/get_previous_units", {
+                    params: {
+                        active_unit: searchUnit
+                    }
+                })
+                .then(function(response) {
+                    nodes = response.data.units.nodes;
+                    edges = response.data.units.edges;
+                    self.loadingSwitch = false;
+                    self.init(nodes, edges);
+                    notLastUnitDown = true;
+                    if (bWaitingForHighlightNode) {
+                        bWaitingForHighlightNode = false;
+                    }
+                })
+                .catch(function(error) {
+                    self.loadingSwitch = false;
+                });
+        },
+
         createCy: function() {
-            var self = this;
             _cy = cytoscape({
                 container: document.getElementById("cy"),
                 boxSelectionEnabled: false,
@@ -542,7 +543,12 @@ export default {
                     e.originalEvent.wheelDeltaY || -e.originalEvent.deltaY;
                 if (page == "dag") {
                     e.preventDefault();
-                    console.log("2222", deltaY,e.originalEvent.wheelDeltaY,-e.originalEvent.deltaY);
+                    console.log(
+                        "2222",
+                        deltaY,
+                        e.originalEvent.wheelDeltaY,
+                        -e.originalEvent.deltaY
+                    );
                     if (deltaY > 0) {
                         self.scrollUp();
                     } else if (deltaY < 0) {
@@ -553,8 +559,6 @@ export default {
             });
         },
         generate: function(_nodes, _edges) {
-            var self = this;
-
             var newOffset_x,
                 newOffset_y,
                 left = Infinity,
@@ -635,7 +639,7 @@ export default {
         //高亮节点 【OK】
         highlightNode: function(unit) {
             console.log(`高亮节点 ${unit}`);
-            var self = this;
+            self.loadingInfoSwitch=true;
             //没有cytoscape 则创建
             if (!_cy) {
                 createCy();
@@ -657,8 +661,8 @@ export default {
                 el.addClass("active");
                 activeNode = el.id();
 
-                //获取高亮节点的详细信息
-                // socket.emit('info', { unit: activeNode });
+                // 获取高亮节点的详细信息
+                self.getAjaxUnitInfo(activeNode);
 
                 if (elPositionY < extent.y1 || elPositionY > extent.y2) {
                     bWaitingForPrev = true;
@@ -682,18 +686,39 @@ export default {
             }
             return false;
         },
+        getAjaxUnitInfo(activeNode) {
+            self.$axios
+                .get("/api/get_transaction", {
+                    params: {
+                        transaction: activeNode
+                    }
+                })
+                .then(function(response) {
+                    if (bWaitingForHighlightNode) {
+                        bWaitingForHighlightNode = false;
+                    }
+                    //开始写数据
+                    self.loadingInfoSwitch=false;
+                    self.activeUnitInfo = response.data.transaction;
+                    $defaultInfo.hide();
+                    $listInfo.show();
+                })
+                .catch(function(error) {
+                    self.loadingSwitch = false;
+                });
+        },
         //从服务器获取高亮节点【OK】
         getHighlightNode: function(unit) {
             console.log("准备从服务器获取高亮节点");
             if (!bWaitingForHighlightNode) {
-                // socket.emit('highlightNode', { first: firstUnit, last: lastUnit, unit: unit });
+                // 高亮当前元素
+                self.getStar(unit);
                 bWaitingForHighlightNode = true;
             }
         },
 
         //设置最新的Unit
         setNew: function(_nodes, _edges, newUnits) {
-            var self = this;
             var newOffset_x,
                 newOffset_y,
                 min = Infinity,
@@ -768,7 +793,6 @@ export default {
             self.updateScrollHeigth();
         },
         animationPanUp: function(distance) {
-            var self = this;
             if (animationPlaysPanUp) {
                 queueAnimationPanUp.push(distance);
             } else {
@@ -809,11 +833,46 @@ export default {
         },
 
         getNew: function() {
-            if (notLastUnitUp) return;
-
+            if (notLastUnitUp) {
+                return;
+            }
             if (!bWaitingForNew) {
-                // socket.emit('new', { unit: firstUnit, notStable: notStable });
                 bWaitingForNew = true;
+                self.$axios
+                    .get("/api/get_previous_units", {
+                        params: {
+                            prev_pkid: firstPkid
+                        }
+                    })
+                    .then(function(response) {
+                        self.loadingSwitch = false;
+                        var responseData = response.data.units;
+
+                        if (responseData.nodes.length) {
+                            nodes = [].concat(responseData.nodes, nodes);
+                            for (var k in responseData.edges) {
+                                if (responseData.edges.hasOwnProperty(k)) {
+                                    edges[k] = responseData.edges[k];
+                                }
+                            }
+                            firstPkid = nodes[0].pkid;
+                            self.setNew(
+                                responseData.nodes,
+                                responseData.edges,
+                                true
+                            );
+                            if (bHaveDelayedNewRequests) {
+                                bHaveDelayedNewRequests = false;
+                                self.getNew();
+                            }
+                            if (responseData.nodes.length >= 100) {
+                                notLastUnitUp = true;
+                            }
+                        }
+                        bWaitingForNew = false;
+                        //把不稳定的设置为稳定的
+                        // setChangesStableUnits(response.data.arrStableUnits);
+                    });
             } else {
                 bHaveDelayedNewRequests = true;
             }
@@ -830,9 +889,7 @@ export default {
                     })
                     .then(function(response) {
                         self.loadingSwitch = false;
-                        console.log("response.data", response.data);
                         var responseData = response.data.units;
-                        // self.getPreUnit(response.data.units);
 
                         if (notLastUnitDown) {
                             if (bWaitingForHighlightNode)
@@ -856,6 +913,7 @@ export default {
                             if (responseData.nodes.length === 0) {
                                 notLastUnitDown = false;
                             }
+                            //把不稳定的设置为稳定的
                             // setChangesStableUnits(response.data.arrStableUnits);
                         }
                     });
@@ -864,14 +922,49 @@ export default {
         getPrev: function() {
             console.log(`获取上一个节点 ${!bWaitingForPrev} ${isInit} `);
             if (!bWaitingForPrev && isInit) {
-                // socket.emit('prev', { first: firstUnit, notStable: notStable });
+                // 获取上一个
                 bWaitingForPrev = true;
+                self.$axios
+                    .get("/api/get_previous_units", {
+                        params: {
+                            prev_pkid: firstPkid
+                        }
+                    })
+                    .then(function(response) {
+                        self.loadingSwitch = false;
+                        var responseData = response.data.units;
+                        if (bWaitingForHighlightNode) {
+                            bWaitingForHighlightNode = false;
+                        }
+
+                        if (responseData.nodes.length) {
+                            nodes = [].concat(responseData.nodes, nodes);
+                            for (var k in responseData.edges) {
+                                if (responseData.edges.hasOwnProperty(k)) {
+                                    edges[k] = responseData.edges[k];
+                                }
+                            }
+                            firstPkid = nodes[0].pkid;
+                            self.setNew(responseData.nodes, responseData.edges);
+                        }
+                        bWaitingForPrev = false;
+                        if (responseData.end === true) {
+                            notLastUnitUp = false;
+                        }
+                        if (waitGo) {
+                            self.highlightNode(waitGo);
+                            waitGo = false;
+                        }
+                        //把不稳定的设置为稳定的
+                        // setChangesStableUnits(response.data.arrStableUnits);
+                    });
             }
         },
+
+        //把不稳定变为稳定
         scrollUp: function() {
             console.log("向上移动");
             var ext = _cy.extent();
-            var self = this;
             if (
                 (notLastUnitUp === false &&
                     ext.y2 - ext.h / 2 >
@@ -900,7 +993,7 @@ export default {
         //返回顶部  【OK】
         goToTop: function() {
             if (notLastUnitUp) {
-                // socket.emit('start', { type: 'last' });
+                self.getStar();
             } else {
                 var el = _cy.getElementById(nodes[0].data.unit);
                 _cy.stop();
@@ -930,6 +1023,31 @@ export default {
         },
 
         //更新不稳定 Unit 列表
+        setChangesStableUnits: function(arrStableUnits) {
+            if (!arrStableUnits) return;
+            var node;
+            arrStableUnits.forEach(function(objUnit) {
+                node = _cy.getElementById(objUnit.unit);
+                if (node) {
+                    if (!node.hasClass("is_stable")) {
+                        node.addClass("is_stable");
+                    }
+                    if (
+                        objUnit.is_on_main_chain === 1 &&
+                        !node.hasClass("is_on_main_chain")
+                    ) {
+                        node.addClass("is_on_main_chain");
+                    } else if (
+                        objUnit.is_on_main_chain === 0 &&
+                        node.hasClass("is_on_main_chain")
+                    ) {
+                        node.removeClass("is_on_main_chain");
+                    }
+                }
+                notStable.splice(notStable.indexOf(objUnit.unit), 1);
+            });
+            self.updListNotStableUnit();
+        },
         updListNotStableUnit: function() {
             if (!_cy) return;
             notStable = [];
@@ -942,7 +1060,6 @@ export default {
 
         //更新Scroll Heigth
         updateScrollHeigth: function() {
-            var self = this;
             var unitTopPos = _cy.getCenterPan(
                 _cy.getElementById(nodes[0].data.unit)
             ).y;
@@ -1027,8 +1144,9 @@ export default {
                             arr[a].position.x > arr[b].position.x - 10 &&
                             arr[a].position.y == arr[b].position.y)
                     ) {
-                        if (!conflicts[arr[a].position.y])
+                        if (!conflicts[arr[a].position.y]) {
                             conflicts[arr[a].position.y] = [];
+                        }
                         conflicts[arr[a].position.y].push(arr[a]);
                     }
                 }
@@ -1058,7 +1176,6 @@ export default {
 
         //创建边缘
         createEdges: function() {
-            var self = this;
             var _edges = self.cloneObj(edges),
                 cyEdges = _cy.edges(),
                 cyEdgesLength = cyEdges.length,
@@ -1162,12 +1279,46 @@ export default {
         //搜索地址/unit 【OK】
         searchForm: function() {
             var text = $inputSearch.val();
-            if (text.length == 44 || text.length == 32) {
+            if (text.length == 64) {
                 location.hash = "#/dag/" + text;
             } else {
                 this.$message.error("请输入正确格式的Unit");
             }
             $inputSearch.val("");
+        },
+        //
+        goParentHash(hash) {
+            self.loadingInfoSwitch = true;
+            location.hash = "#/dag/" + hash;
+        }
+    },
+    filters: {
+        toCZRVal: function(val) {
+            let tempVal = self.$czr.utils.fromWei(val, "czr");
+            return tempVal;
+        },
+        toDate: function(val) {
+            if (val == "0" || !val) {
+                return "-";
+            }
+            let newDate = new Date();
+            newDate.setTime(val * 1000);
+            let addZero = function(val) {
+                return val < 10 ? "0" + val : val;
+            };
+            return (
+                newDate.getFullYear() +
+                " / " +
+                addZero(newDate.getMonth() + 1) +
+                " / " +
+                addZero(newDate.getDate()) +
+                " " +
+                addZero(newDate.getHours()) +
+                ":" +
+                addZero(newDate.getMinutes()) +
+                ":" +
+                addZero(newDate.getSeconds())
+            );
         }
     }
 };
@@ -1260,20 +1411,6 @@ body {
     background: #403f75;
     border-radius: 3px;
 }
-#infoMessage {
-    position: absolute;
-    z-index: 1001;
-    left: 0;
-    right: 0;
-    text-align: center;
-    top: 45px;
-    font-size: 20px;
-    padding: 13px;
-    color: #fff;
-    background-color: #ff8585;
-    cursor: pointer;
-    display: none;
-}
 
 #cy {
     position: absolute;
@@ -1302,7 +1439,6 @@ body {
     color: #808080;
 }
 
-#infoClose,
 #addressClose {
     text-align: right;
     font-size: 18px;
@@ -1326,19 +1462,12 @@ body {
     padding-left: 3px;
 }
 
-#info > #listInfo > div {
-    margin-top: 10px;
-}
-
 .infoTitle {
     font-weight: bold;
-    padding: 5px;
+    padding: 5px 0px;
     cursor: pointer;
-    color: #333333;
-}
-
-.infoTitle:hover {
-    color: #868686;
+    color: #1d1d1d;
+    border-bottom: 1px dashed #d6d6d6;
 }
 
 .infoTitle.hideTitle {
@@ -1353,6 +1482,13 @@ body {
     height: 12px;
     margin-bottom: -2px;
 }
+.info-item-dev {
+    padding: 7px;
+    word-wrap: break-word;
+}
+.info-item-dev span {
+    color: #808080;
+}
 
 .infoTitle.hideTitle > .infoTitleImg {
     /* background-image: url(../img/gray_right.png); */
@@ -1360,18 +1496,6 @@ body {
 
 .infoTitle.hideTitle:hover {
     color: #333333;
-}
-
-#addressInfo .infoTitle {
-    padding: 5px 0;
-}
-
-#addressInfo .infoTitle > .infoTitleImg {
-    margin-bottom: -1px;
-}
-
-#addressInfo .infoTitle.hideTitle > .infoTitleImg {
-    margin-bottom: -1px;
 }
 
 .infoTitleChild {
@@ -1431,13 +1555,11 @@ a {
     display: block;
     padding: 5px;
 }
-
+#listInfo {
+    padding-left: 10px;
+}
 pre {
     margin: 0;
-}
-
-#otherInfo > div {
-    padding: 0 5px;
 }
 
 .outputs_div {
@@ -1623,10 +1745,6 @@ pre {
 
     #info.hideInfoBlock {
         display: none;
-    }
-
-    #infoClose {
-        display: block;
     }
 
     #listUnits td {

@@ -218,10 +218,12 @@ router.get("/get_transactions", function (req, res, next) {
 router.get("/get_transaction", function (req, res, next) {
     var queryTransaction = req.query.transaction;// ?account=2
     pgclient.query("Select * FROM transaction  WHERE hash = $1", [queryTransaction], (data) => {
-        console.log("/get_transaction", queryTransaction, data)
         if ((data != "error") && (data.length != 0)) {
-            responseData.transaction = data[0];
-            res.json(responseData);
+            pgclient.query("Select * FROM parents WHERE item = $1 ORDER BY parents_id DESC", [data[0].hash], function (result) {
+                responseData.transaction = data[0];
+                responseData.transaction.parents = result;
+                res.json(responseData);
+            });
         } else if (data.length == 0) {
             responseData.code = 404;
             responseData.message = "error";
@@ -234,41 +236,37 @@ router.get("/get_transaction", function (req, res, next) {
     });
 })
 
-//DAG
-router.get("/get_dag_units", function (req, res, next) {
-    pgclient.query("Select * FROM transaction ORDER BY pkid DESC limit 50", (data) => {
-
-        responseData = {
-            units: {
-                nodes: formatUnits(data),
-                edges: ""
-            },
-            code: 0,
-            message: "success"
-        }
-        res.json(responseData);
-    });
-})
-
 //获取以前的unit
 router.get("/get_previous_units", function (req, res, next) {
     //Select * FROM transaction WHERE pkid < $1 ORDER BY pkid DESC limit 50
     //Select * FROM parents WHERE item = $1 OR parent=$1 ORDER BY parents_id DESC
     var prev_pkid = Number(req.query.prev_pkid);
     var next_pkid = Number(req.query.next_pkid);
+    var active_unit = req.query.active_unit;
     var sqlOptions;
-    console.log("next_pkid",next_pkid)
-    if(next_pkid){
+    if (next_pkid) {
         //下一个
         sqlOptions = {
-            text: "Select * FROM transaction WHERE pkid < $1 ORDER BY pkid DESC limit 20",
+            text: "Select * FROM transaction WHERE pkid < $1 ORDER BY pkid DESC limit 100",
             values: [next_pkid]
         }
-    }else{
-        sqlOptions = "Select * FROM transaction ORDER BY pkid DESC limit 20"
+    } else if (prev_pkid) {
+        //上一个
+        sqlOptions = {
+            text: "Select * FROM transaction WHERE pkid > $1 ORDER BY pkid DESC limit 100",
+            values: [prev_pkid]
+        }
+    } else if (active_unit) {
+        // "(select * from transaction where pkid > (select pkid from transaction where hash = $1 limit 1) limit 60 ) union (select * from transaction where pkid <= (select pkid from transaction where hash = $1 limit 1) limit 60 ) order by pkid desc",
+        sqlOptions = {
+            text: "select * from transaction where pkid > ((select pkid from transaction where hash = $1 limit 1)-49)  and pkid <((select pkid from transaction where hash = $1 limit 1)+50)  order by pkid desc",
+            values: [active_unit]
+        }
+    } else {
+        sqlOptions = "Select * FROM transaction ORDER BY pkid DESC limit 100"
     }
 
-    var pkid = Number(req.query.pkid);
+
     pgclient.query(sqlOptions, (data) => {
         // pgclient.query("Select * FROM transaction WHERE pkid < $1 ORDER BY pkid DESC limit 20", [pkid], (data) => {
         var tempEdges = {};
@@ -276,15 +274,23 @@ router.get("/get_previous_units", function (req, res, next) {
             // console.log("BEGIN",sqlOptions,data);
             data.forEach(item => {
                 pgclient.query("Select * FROM parents WHERE item = $1 OR parent=$1 ORDER BY parents_id DESC", [item.hash], function (result) {
-                    result.forEach((parentItem) => {
-                        tempEdges[parentItem.item + '_' + parentItem.parent] = {
-                            "data": {
-                                "source": parentItem.item,
-                                "target": parentItem.parent
-                            },
-                            "best_parent_unit": true
-                        }
-                    });
+                    //result.forEach is not a function
+                    console.log("error Error=>",result.length)
+
+                    if(result!='error'){
+                        result.forEach((parentItem) => {
+                            tempEdges[parentItem.item + '_' + parentItem.parent] = {
+                                "data": {
+                                    "source": parentItem.item,
+                                    "target": parentItem.parent
+                                },
+                                "best_parent_unit": true
+                            }
+                        });
+                    }else{
+                        console.log("error=>",result)
+                    }
+
                 });
             });
             pgclient.query('COMMIT', (err, commitRes) => {
