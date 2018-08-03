@@ -214,6 +214,18 @@ router.get("/get_transactions", function (req, res, next) {
     });
 })
 
+//获取最新的交易
+router.get("/get_latest_transactions", function (req, res, next) {
+    pgclient.query("Select * FROM transaction ORDER BY level DESC LIMIT 10", (data) => {
+        if (data != 'error') {
+            responseData.transactions = data;
+            responseData.code = 0;
+            responseData.message = "success";
+            res.json(responseData);
+        }
+    });
+})
+
 //获取交易号信息
 router.get("/get_transaction", function (req, res, next) {
     var queryTransaction = req.query.transaction;// ?account=2
@@ -275,9 +287,9 @@ router.get("/get_previous_units", function (req, res, next) {
             data.forEach(item => {
                 pgclient.query("Select * FROM parents WHERE item = $1 OR parent=$1 ORDER BY parents_id DESC", [item.hash], function (result) {
                     //result.forEach is not a function
-                    console.log("error Error=>",result.length)
+                    console.log("error Error=>", result.length)
 
-                    if(result!='error'){
+                    if (result != 'error') {
                         result.forEach((parentItem) => {
                             tempEdges[parentItem.item + '_' + parentItem.parent] = {
                                 "data": {
@@ -287,8 +299,8 @@ router.get("/get_previous_units", function (req, res, next) {
                                 "best_parent_unit": true
                             }
                         });
-                    }else{
-                        console.log("error=>",result)
+                    } else {
+                        console.log("error=>", result)
                     }
 
                 });

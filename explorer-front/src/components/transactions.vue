@@ -43,7 +43,7 @@
                                     </el-button>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="状态" min-width="100">
+                            <el-table-column label="状态" min-width="100"  align="center">
                                 <template slot-scope="scope">
                                     <template v-if="scope.row.is_stable === false">
                                         <span class="txt-warning">
