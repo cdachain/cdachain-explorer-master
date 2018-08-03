@@ -1,8 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from '@/components/Home/Home'
 
-
+import Home from '@/components/home'
 import Block from '@/components/block'
 import Dag from '@/components/dag'
 import Account from '@/components/account'
