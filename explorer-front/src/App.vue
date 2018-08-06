@@ -26,8 +26,8 @@ export default {
 }
 
 .container {
-    padding-right: 20px;
-    padding-left: 20px;
+    padding-right: 10px;
+    padding-left: 10px;
     margin-right: auto;
     margin-left: auto
 }

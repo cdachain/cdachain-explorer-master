@@ -16,14 +16,19 @@
                                     <span class="table-long-item">{{scope.row.exec_timestamp | toDate}}</span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="交易号" width="200">
+                            <el-table-column label="level" width="80">
+                                <template slot-scope="scope">
+                                    <span>{{scope.row.level}}</span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="交易号" width="180">
                                 <template slot-scope="scope">
                                     <el-button @click="goBlockPath(scope.row.hash)" type="text">
                                         <span class="table-long-item">{{scope.row.hash}}</span>
                                     </el-button>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="发款方" width="200">
+                            <el-table-column label="发款方" width="180">
                                 <template slot-scope="scope">
                                     <template v-if="scope.row.mci <= 0">
                                         <span class="table-long-item">Gene</span>
@@ -36,14 +41,14 @@
 
                                 </template>
                             </el-table-column>
-                            <el-table-column label="收款方" width="200">
+                            <el-table-column label="收款方" width="180">
                                 <template slot-scope="scope">
                                     <el-button @click="goAccountPath(scope.row.to)" type="text">
                                         <span class="table-long-item">{{scope.row.to}}</span>
                                     </el-button>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="状态" min-width="100"  align="center">
+                            <el-table-column label="状态" min-width="100" align="center">
                                 <template slot-scope="scope">
                                     <template v-if="scope.row.is_stable === false">
                                         <span class="txt-warning">
@@ -71,7 +76,7 @@
                                     </span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="金额 / CZR" align="right" min-width="220">
+                            <el-table-column label="金额 / CZR" align="right" min-width="200">
                                 <template slot-scope="scope">
                                     <span class="table-long-item">{{scope.row.amount | toCZRVal}}</span>
                                 </template>
@@ -81,7 +86,7 @@
                     </template>
                 </div>
                 <div class="pagin-block">
-                    <el-pagination small background layout="total,prev, pager, next" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="limitVal" :total="totalVal"  :pager-count="5">
+                    <el-pagination small background layout="total,prev, pager, next" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="limitVal" :total="totalVal" :pager-count="5">
                     </el-pagination>
                 </div>
             </div>

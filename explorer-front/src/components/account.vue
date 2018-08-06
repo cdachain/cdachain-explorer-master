@@ -32,14 +32,19 @@
                                         <span class="table-long-item">{{scope.row.exec_timestamp | toDate}}</span>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="交易号" width="200">
+                                <el-table-column label="level" width="80">
+                                    <template slot-scope="scope">
+                                        <span>{{scope.row.level}}</span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="交易号" width="180">
                                     <template slot-scope="scope">
                                         <el-button @click="goBlockPath(scope.row.hash)" type="text">
                                             <span class="table-long-item">{{scope.row.hash}}</span>
                                         </el-button>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="发款方" width="210">
+                                <el-table-column label="发款方" width="180">
                                     <template slot-scope="scope">
                                         <template v-if="scope.row.is_from_this_account == false">
                                             <el-button @click="goAccountPath(scope.row.from)" type="text">
@@ -70,7 +75,7 @@
                                         </span>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="收款方" width="210">
+                                <el-table-column label="收款方" width="180">
                                     <template slot-scope="scope">
                                         <template v-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == false)">
                                             <el-button @click="goAccountPath(scope.row.to)" type="text">
@@ -89,7 +94,7 @@
                                 </el-table-column>
                             </el-table>
                             <div class="pagin-block">
-                                <el-pagination   small background layout="total,prev, pager, next" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="limitVal" :total="totalVal" :pager-count="5">
+                                <el-pagination small background layout="total,prev, pager, next" @current-change="handleCurrentChange" :current-page.sync="currentPage" :page-size="limitVal" :total="totalVal" :pager-count="5">
                                 </el-pagination>
                             </div>
                         </template>

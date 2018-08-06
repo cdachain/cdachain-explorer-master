@@ -125,9 +125,12 @@ router.get("/get_account_list", function (req, res, next) {
     } else {
         page = Number(queryPage) || 1;
     }
-    pgclient.query('Select COUNT(1) FROM transaction WHERE "from" = $1 OR "to"=$1 ', [queryAccount], (count) => {
-        count = count[0].count;
-        console.log("=>", count)
+    //TODO 筛选To里 不是失败的
+    // is_stable === true  and  is_fork === false and is_invalid === false and is_fail === false
+    pgclient.query('Select COUNT(1) FROM transaction WHERE "from" = $1 OR ("to"=$1 and is_stable = true and  is_fork = false and is_invalid = false and is_fail = false )', [queryAccount], (count) => {
+        console.log("error",count)
+        count = count[0].count;//TODO 这么写有BUG
+        // console.log("=>", count)
         pages = Math.ceil(count / LIMITVAL);
         //paga 不大于 pages
         page = Math.min(pages, page);
@@ -135,8 +138,7 @@ router.get("/get_account_list", function (req, res, next) {
         page = Math.max(page, 1);
         OFFSETVAL = (page - 1) * LIMITVAL;
         // *,balance/sum(balance) 
-        pgclient.query('Select * FROM transaction WHERE "from" = $1 OR "to"=$1 ORDER BY pkid DESC LIMIT ' + LIMITVAL + " OFFSET " + OFFSETVAL, [queryAccount], (data) => {
-            console.log("data", data)
+        pgclient.query('Select * FROM transaction WHERE "from" = $1 OR ("to"=$1 and is_stable = true and  is_fork = false and is_invalid = false and is_fail = false ) ORDER BY pkid DESC LIMIT ' + LIMITVAL + " OFFSET " + OFFSETVAL, [queryAccount], (data) => {
             if (data == 'error') {
                 responseData = {
                     tx_list: [],
@@ -188,7 +190,7 @@ router.get("/get_transactions", function (req, res, next) {
     }
     pgclient.query("Select COUNT(1) FROM transaction", (count) => {
         count = count[0].count;
-        console.log("->", count)
+        // console.log("->", count)
         pages = Math.ceil(count / LIMITVAL);
         //paga 不大于 pages
         page = Math.min(pages, page);
@@ -287,7 +289,7 @@ router.get("/get_previous_units", function (req, res, next) {
             data.forEach(item => {
                 pgclient.query("Select * FROM parents WHERE item = $1 OR parent=$1 ORDER BY parents_id DESC", [item.hash], function (result) {
                     //result.forEach is not a function
-                    console.log("error Error=>", result.length)
+                    // console.log("error Error=>", result.length)
 
                     if (result != 'error') {
                         result.forEach((parentItem) => {
@@ -306,7 +308,7 @@ router.get("/get_previous_units", function (req, res, next) {
                 });
             });
             pgclient.query('COMMIT', (err, commitRes) => {
-                console.log("COMMIT");
+                // console.log("COMMIT");
                 responseData = {
                     units: {
                         nodes: formatUnits(data),
@@ -315,7 +317,7 @@ router.get("/get_previous_units", function (req, res, next) {
                     code: 0,
                     message: "success"
                 }
-                console.log("responseData")
+                // console.log("responseData")
                 res.json(responseData);
 
             });

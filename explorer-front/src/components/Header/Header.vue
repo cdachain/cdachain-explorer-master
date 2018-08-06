@@ -107,6 +107,9 @@ export default {
     -o-transform: rotate(90deg);
     transform: rotate(90deg);
 }
+.navbar{
+    padding: 0;
+}
 
 @media (min-width: 768px) {
     .navbar-toggle {

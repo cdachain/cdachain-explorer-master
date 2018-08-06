@@ -39,9 +39,9 @@ export default {
                 //account
                 this.$router.push("/account/" + currentVal);
             } else if (!currentVal) {
-                this.$message.error("请输入您要查询的账号或交易号");
+                this.$message.error("输入要查询的账号或交易号");
             } else {
-                this.$message.error("输入值不是合法的账号或交易号，请仔细核对");
+                this.$message.error("不是合法的账号或交易号，请仔细核对");
             }
         }
     }
