@@ -145,6 +145,9 @@
 <script>
 import $ from "jquery";
 
+import ('@/assets/js/cytoscape.min.js');
+import ('@/assets/js/dagre.min.js');
+
 var $page;
 var $inputSearch;
 var $cy;
@@ -308,7 +311,6 @@ export default {
             //hash改变时触发
             window.addEventListener("hashchange", function() {
                 self.activeUnit = location.hash.substr(6);
-                console.log("self.activeUnit", self.activeUnit, location.hash);
                 if (self.activeUnit.length == 64) {
                     self.highlightNode(self.activeUnit);
                     //隐藏显示的面板
@@ -517,8 +519,13 @@ export default {
 
             //鼠标点击
             _cy.on("click", "node", function(evt) {
-                window.location.href = "/#/dag/" + evt.target._private.data.id;
-                // self.$router.push("/dag/" + evt.target._private.data.id);
+                console.log("click")
+                window.location.href = "/#/dag/" + evt.cyTarget.id()
+            });
+
+            _cy.on("tap", "node", function(evt) {
+                console.log("tap")
+                window.location.href = "/#/dag/" + evt.cyTarget.id()
             });
 
             //拖动事件
@@ -639,7 +646,7 @@ export default {
         //高亮节点 【OK】
         highlightNode: function(unit) {
             console.log(`高亮节点 ${unit}`);
-            self.loadingInfoSwitch=true;
+            self.loadingInfoSwitch = true;
             //没有cytoscape 则创建
             if (!_cy) {
                 createCy();
@@ -698,7 +705,7 @@ export default {
                         bWaitingForHighlightNode = false;
                     }
                     //开始写数据
-                    self.loadingInfoSwitch=false;
+                    self.loadingInfoSwitch = false;
                     self.activeUnitInfo = response.data.transaction;
                     $defaultInfo.hide();
                     $listInfo.show();
