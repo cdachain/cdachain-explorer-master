@@ -230,7 +230,7 @@ export default {
     text-align: right;
 }
 .table-long-item {
-    width: 180px;
+    max-width: 150px;
     display: inline-block;
     overflow: hidden;
     text-overflow: ellipsis;

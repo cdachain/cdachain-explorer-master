@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 
-var pgclient = require('../PG_ALL');// 引用上述文件
+var pgclient = require('../database/PG_ALL');// 引用上述文件
 pgclient.getConnection();
 
 var responseData = null;
@@ -16,7 +16,21 @@ router.use(function (req, res, next) {
 var formatUnits = function (unitsAry) {
     var nodesTempAry = [];
     var tempInfo;
+    var tempStatus;
     unitsAry.forEach(function (item) {
+        if(item.is_stable){
+            if(item.is_fork||item.is_invalid){
+                tempStatus="temp-bad";
+            }else{
+                if(item.is_fail){
+                    tempStatus='final-bad'
+                }else{
+                    tempStatus='good'
+                }
+            }
+        }else{
+            tempStatus='good'
+        }
         tempInfo = {
             "data": {
                 "unit": item.hash,
@@ -25,7 +39,7 @@ var formatUnits = function (unitsAry) {
             "pkid": Number(item.pkid),
             "is_on_main_chain": Number(item.is_on_mc),
             "is_stable": Number(item.is_stable),
-            "sequence": "good"
+            "sequence": tempStatus
         }
         nodesTempAry.push(tempInfo);
     })
@@ -128,7 +142,6 @@ router.get("/get_account_list", function (req, res, next) {
     //TODO 筛选To里 不是失败的
     // is_stable === true  and  is_fork === false and is_invalid === false and is_fail === false
     pgclient.query('Select COUNT(1) FROM transaction WHERE "from" = $1 OR ("to"=$1 and is_stable = true and  is_fork = false and is_invalid = false and is_fail = false )', [queryAccount], (count) => {
-        console.log("error",count)
         count = count[0].count;//TODO 这么写有BUG
         // console.log("=>", count)
         pages = Math.ceil(count / LIMITVAL);
@@ -198,7 +211,7 @@ router.get("/get_transactions", function (req, res, next) {
         page = Math.max(page, 1);
         OFFSETVAL = (page - 1) * LIMITVAL;
         // *,balance/sum(balance) 
-        pgclient.query("Select * FROM transaction ORDER BY level DESC LIMIT " + LIMITVAL + " OFFSET " + OFFSETVAL, (data) => {
+        pgclient.query("Select * FROM transaction ORDER BY level DESC LIMIT $1  OFFSET $2",[LIMITVAL,OFFSETVAL], (data) => {
             //改造数据 排名 , 金额，占比
             var basePage = Number(queryPage) - 1; // 1 2
             var transactions = data;
@@ -279,6 +292,7 @@ router.get("/get_previous_units", function (req, res, next) {
     } else {
         sqlOptions = "Select * FROM transaction ORDER BY pkid DESC limit 100"
     }
+    console.log("sqlOptions",sqlOptions)
 
 
     pgclient.query(sqlOptions, (data) => {
@@ -316,25 +330,12 @@ router.get("/get_previous_units", function (req, res, next) {
                     },
                     code: 0,
                     message: "success"
-                }
+                };
                 // console.log("responseData")
                 res.json(responseData);
 
             });
         });
-
-
-        // responseData = {
-        //     units: {
-        //         nodes: formatUnits(data),
-        //         edges: tempEdges
-        //     },
-        //     code: 0,
-        //     message: "success"
-        // }
-        // console.log("responseData")
-        // res.json(responseData);
-
     });
 });
 

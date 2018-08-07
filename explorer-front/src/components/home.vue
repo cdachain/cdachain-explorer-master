@@ -9,19 +9,24 @@
                 <h2 class="home-content-tit">最新交易</h2>
                 <template>
                     <el-table :data="database" style="width: 100%" v-loading="loadingSwitch">
-                        <el-table-column label="时间" width="180">
+                        <el-table-column label="时间" width="170">
                             <template slot-scope="scope">
                                 <span class="table-long-item">{{scope.row.exec_timestamp | toDate}}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="交易号" width="200">
+                        <el-table-column label="level" width="80">
+                            <template slot-scope="scope">
+                                <span>{{scope.row.level}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="交易号" width="170">
                             <template slot-scope="scope">
                                 <el-button @click="goBlockPath(scope.row.hash)" type="text">
                                     <span class="table-long-item">{{scope.row.hash}}</span>
                                 </el-button>
                             </template>
                         </el-table-column>
-                        <el-table-column label="发款方" width="200">
+                        <el-table-column label="发款方" width="170">
                             <template slot-scope="scope">
                                 <template v-if="scope.row.mci <= 0">
                                     <span class="table-long-item">Gene</span>
@@ -34,7 +39,7 @@
 
                             </template>
                         </el-table-column>
-                        <el-table-column label="收款方" width="200">
+                        <el-table-column label="收款方" width="170">
                             <template slot-scope="scope">
                                 <el-button @click="goAccountPath(scope.row.to)" type="text">
                                     <span class="table-long-item">{{scope.row.to}}</span>
@@ -43,30 +48,30 @@
                         </el-table-column>
                         <el-table-column label="状态" min-width="100" align="center">
                             <template slot-scope="scope">
-                                    <template v-if="scope.row.is_stable === false">
-                                        <span class="txt-warning">
-                                            等待确认
+                                <template v-if="scope.row.is_stable === false">
+                                    <span class="txt-warning">
+                                        等待确认
+                                    </span>
+                                </template>
+                                <template v-else>
+                                    <template v-if="scope.row.is_fork === true || scope.row.is_invalid === true">
+                                        <span class="txt-info">
+                                            失败
                                         </span>
                                     </template>
                                     <template v-else>
-                                        <template v-if="scope.row.is_fork === true || scope.row.is_invalid === true">
-                                            <span class="txt-info">
-                                                失败
-                                            </span>
+                                        <template v-if="scope.row.is_fail === true">
+                                            <span class="txt-danger"> 失败 </span>
                                         </template>
                                         <template v-else>
-                                            <template v-if="scope.row.is_fail === true">
-                                                <span class="txt-danger"> 失败 </span>
-                                            </template>
-                                            <template v-else>
-                                                <span class="txt-success">成功</span>
-                                            </template>
+                                            <span class="txt-success">成功</span>
                                         </template>
                                     </template>
+                                </template>
 
-                                    <span v-else class="xt-info">
-                                        -
-                                    </span>
+                                <span v-else class="xt-info">
+                                    -
+                                </span>
                             </template>
                         </el-table-column>
                         <el-table-column label="金额 / CZR" align="right" min-width="220">
@@ -186,5 +191,12 @@ export default {
     padding: 20px 10px 10px 0;
     font-size: 18px;
     color: #838383;
+}
+.table-long-item {
+    max-width: 150px;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>

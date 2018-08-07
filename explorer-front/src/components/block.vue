@@ -28,21 +28,32 @@
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">
-                            <span v-if="txStatus === -1" class="txt-warning">
-                                等待确认
-                            </span>
-                            <span v-else-if="txStatus === 200" class="txt-success">
-                                成功
-                            </span>
-                            <span v-else-if="txStatus === 300" class="txt-info">
-                                失败
-                            </span>
-                            <span v-else-if="txStatus === 400" class="txt-danger">
-                                失败
-                            </span>
-                            <span v-else class="xt-info">
-                                -
-                            </span>
+                            <template>
+                                <template v-if="blockInfo.is_stable === false">
+                                    <span class="txt-warning">
+                                        等待确认
+                                    </span>
+                                </template>
+                                <template v-else>
+                                    <template v-if="blockInfo.is_fork === true || blockInfo.is_invalid === true">
+                                        <span class="txt-info">
+                                            失败
+                                        </span>
+                                    </template>
+                                    <template v-else>
+                                        <template v-if="blockInfo.is_fail === true">
+                                            <span class="txt-danger"> 失败 </span>
+                                        </template>
+                                        <template v-else>
+                                            <span class="txt-success">成功</span>
+                                        </template>
+                                    </template>
+                                </template>
+
+                                <span v-else class="xt-info">
+                                    -
+                                </span>
+                            </template>
                         </div>
                     </div>
                     <div class="block-item-des">
@@ -96,7 +107,6 @@ export default {
     data() {
         return {
             blockHash: this.$route.params.id,
-            txStatus: "-",
             blockInfo: {
                 from: "-",
                 to: "-",
@@ -139,28 +149,12 @@ export default {
                     }
                 })
                 .then(function(response) {
-                    console.log("response.data.message ",response.data.message )
+                    console.log(
+                        "response.data.message ",
+                        response.data.message
+                    );
                     if (response.data.message != "error") {
                         self.blockInfo = response.data.transaction;
-                        if (self.blockInfo.is_stable == false) {
-                            //不稳定
-                            self.txStatus = -1; //不稳定
-                        } else if (self.blockInfo.is_stable == true) {
-                            //稳定
-                            if (
-                                self.blockInfo.is_fork == true ||
-                                self.blockInfo.is_invalid == true
-                            ) {
-                                self.txStatus = 300; //作废
-                                //
-                            } else {
-                                if (self.blockInfo.is_fail == true) {
-                                    self.txStatus = 400; //失败
-                                } else {
-                                    self.txStatus = 200; //成功
-                                }
-                            }
-                        }
                     }
 
                     self.loadingSwitch = false;

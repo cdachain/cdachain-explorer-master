@@ -19,7 +19,7 @@
                         <strong class="bui-dlist-tit">交易数
                             <span class="space-des"></span>
                         </strong>
-                        <div class="bui-dlist-det">{{accountInfo.tran_count}} 次</div>
+                        <div class="bui-dlist-det">{{totalVal}} 次</div>
                     </div>
                 </div>
                 <div class="account-content">
@@ -27,7 +27,7 @@
                     <div class="accounts-list-wrap" v-loading="loadingSwitch">
                         <template>
                             <el-table :data="tx_list" style="width: 100%">
-                                <el-table-column label="时间" width="180">
+                                <el-table-column label="时间" width="170">
                                     <template slot-scope="scope">
                                         <span class="table-long-item">{{scope.row.exec_timestamp | toDate}}</span>
                                     </template>
@@ -37,14 +37,14 @@
                                         <span>{{scope.row.level}}</span>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="交易号" width="180">
+                                <el-table-column label="交易号" width="170">
                                     <template slot-scope="scope">
                                         <el-button @click="goBlockPath(scope.row.hash)" type="text">
                                             <span class="table-long-item">{{scope.row.hash}}</span>
                                         </el-button>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="发款方" width="180">
+                                <el-table-column label="发款方" width="170">
                                     <template slot-scope="scope">
                                         <template v-if="scope.row.is_from_this_account == false">
                                             <el-button @click="goAccountPath(scope.row.from)" type="text">
@@ -75,7 +75,7 @@
                                         </span>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="收款方" width="180">
+                                <el-table-column label="收款方" width="170">
                                     <template slot-scope="scope">
                                         <template v-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == false)">
                                             <el-button @click="goAccountPath(scope.row.to)" type="text">
@@ -87,7 +87,35 @@
                                         </template>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="金额 / CZR" width="220" align="right">
+                                <el-table-column label="状态" min-width="100" align="center">
+                                    <template slot-scope="scope">
+                                        <template v-if="scope.row.is_stable === false">
+                                            <span class="txt-warning">
+                                                等待确认
+                                            </span>
+                                        </template>
+                                        <template v-else>
+                                            <template v-if="scope.row.is_fork === true || scope.row.is_invalid === true">
+                                                <span class="txt-info">
+                                                    失败
+                                                </span>
+                                            </template>
+                                            <template v-else>
+                                                <template v-if="scope.row.is_fail === true">
+                                                    <span class="txt-danger"> 失败 </span>
+                                                </template>
+                                                <template v-else>
+                                                    <span class="txt-success">成功</span>
+                                                </template>
+                                            </template>
+                                        </template>
+
+                                        <span v-else class="xt-info">
+                                            -
+                                        </span>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="金额 / CZR" width="170" align="right">
                                     <template slot-scope="scope">
                                         <span class="table-long-item">{{scope.row.amount | toCZRVal}}</span>
                                     </template>
@@ -98,12 +126,6 @@
                                 </el-pagination>
                             </div>
                         </template>
-                    </div>
-
-                    <!--  No transaction record  -->
-                    <div v-if="tx_list.length==0" class="no-transfer-log">
-                        <i class="el-icon-document iconfont"></i>
-                        <p class="no-list">暂无交易记录</p>
                     </div>
                 </div>
             </div>
@@ -463,7 +485,7 @@ export default {
     text-align: right;
 }
 .table-long-item {
-    width: 180px;
+    max-width: 150px;
     display: inline-block;
     overflow: hidden;
     text-overflow: ellipsis;

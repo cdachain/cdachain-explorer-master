@@ -1,4 +1,4 @@
-var pgclient = require('./PG_ALL');// 引用上述文件
+let pgclient = require('./PG_ALL');// 引用上述文件
 pgclient.getConnection();
 
 //删除 client.query("DELETE FROM test WHERE name=$1", ["xiaoming"])})

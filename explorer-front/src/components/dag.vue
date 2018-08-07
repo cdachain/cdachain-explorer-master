@@ -383,6 +383,14 @@ export default {
                     }
                 })
                 .then(function(response) {
+                    if(response.data.units.nodes.length===0){
+                        //TODO 回调
+                        self.$message.error(searchUnit+"，不是合法的HAXI");
+                        self.loadingSwitch = false;
+                        window.location.href = "/#/dag/"
+                        return;
+                    }
+                    
                     nodes = response.data.units.nodes;
                     edges = response.data.units.edges;
                     self.loadingSwitch = false;
@@ -519,12 +527,10 @@ export default {
 
             //鼠标点击
             _cy.on("click", "node", function(evt) {
-                console.log("click")
                 window.location.href = "/#/dag/" + evt.cyTarget.id()
             });
 
             _cy.on("tap", "node", function(evt) {
-                console.log("tap")
                 window.location.href = "/#/dag/" + evt.cyTarget.id()
             });
 
@@ -539,6 +545,7 @@ export default {
                     ext.y2 - ext.h <
                         _cy.getElementById(nodes[0].data.unit).position().y
                 ) {
+                    self.loadingSwitch = true;
                     self.getPrev();
                 }
                 $scroll.scrollTop(self.convertPosPanToPosScroll());
@@ -550,12 +557,6 @@ export default {
                     e.originalEvent.wheelDeltaY || -e.originalEvent.deltaY;
                 if (page == "dag") {
                     e.preventDefault();
-                    console.log(
-                        "2222",
-                        deltaY,
-                        e.originalEvent.wheelDeltaY,
-                        -e.originalEvent.deltaY
-                    );
                     if (deltaY > 0) {
                         self.scrollUp();
                     } else if (deltaY < 0) {
@@ -645,7 +646,6 @@ export default {
 
         //高亮节点 【OK】
         highlightNode: function(unit) {
-            console.log(`高亮节点 ${unit}`);
             self.loadingInfoSwitch = true;
             //没有cytoscape 则创建
             if (!_cy) {
@@ -716,7 +716,6 @@ export default {
         },
         //从服务器获取高亮节点【OK】
         getHighlightNode: function(unit) {
-            console.log("准备从服务器获取高亮节点");
             if (!bWaitingForHighlightNode) {
                 // 高亮当前元素
                 self.getStar(unit);
@@ -885,7 +884,6 @@ export default {
             }
         },
         getNext: function() {
-            console.log(`获取下一个节点 ${!bWaitingForNext} ${isInit} `);
             if (!bWaitingForNext && isInit) {
                 bWaitingForNext = true;
                 self.$axios
@@ -927,10 +925,10 @@ export default {
             }
         },
         getPrev: function() {
-            console.log(`获取上一个节点 ${!bWaitingForPrev} ${isInit} `);
             if (!bWaitingForPrev && isInit) {
                 // 获取上一个
                 bWaitingForPrev = true;
+                
                 self.$axios
                     .get("/api/get_previous_units", {
                         params: {
@@ -940,6 +938,7 @@ export default {
                     .then(function(response) {
                         self.loadingSwitch = false;
                         var responseData = response.data.units;
+
                         if (bWaitingForHighlightNode) {
                             bWaitingForHighlightNode = false;
                         }
@@ -955,7 +954,8 @@ export default {
                             self.setNew(responseData.nodes, responseData.edges);
                         }
                         bWaitingForPrev = false;
-                        if (responseData.end === true) {
+                        //如果没了
+                        if (responseData.nodes.length < 100) {
                             notLastUnitUp = false;
                         }
                         if (waitGo) {
@@ -970,7 +970,6 @@ export default {
 
         //把不稳定变为稳定
         scrollUp: function() {
-            console.log("向上移动");
             var ext = _cy.extent();
             if (
                 (notLastUnitUp === false &&
@@ -983,6 +982,7 @@ export default {
             ) {
                 _cy.panBy({ x: 0, y: 25 });
             } else if (notLastUnitUp === true) {
+                self.loadingSwitch = true;
                 self.getPrev();
             }
         },
@@ -1200,7 +1200,6 @@ export default {
                 }
             }
 
-            console.dir(phantoms);
             for (k in phantoms) {
                 _cy.getElementById(k).position("y", generateOffset + 166);
             }

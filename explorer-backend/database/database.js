@@ -1,6 +1,6 @@
 let BigNumber = require('bignumber.js').default;
 
-let Czr = require("./czr");
+let Czr = require("../czr/index");
 let czr = new Czr();
 
 let pgclient = require('./PG_ALL');// 引用上述文件
@@ -32,7 +32,7 @@ let pageUtility = {
             if (data.length === 0) {
                 local_stable_mci = 0;
             } else if (data.length === 1) {
-                local_stable_mci = Number(data[0].mci) + 1;
+                local_stable_mci = Number(data[0].mci);
             }
             console.log(`第一次获取到数据库的数据 :${data}, local_stable_mci:${local_stable_mci}`);
             pageUtility.init();
@@ -43,14 +43,14 @@ let pageUtility = {
         //更新数据
         getRPCTimer = setTimeout(function () {
             pageUtility.getRPC()
-        }, 1500)
+        }, 2000)
     },
     getRPC() {
         //获取 status 的 last_stable_mci
         czr.request.status().then(function (status) {
             return status
         }).then(function (status) {
-            last_stable_mci = status.status.last_stable_mci;
+            last_stable_mci = Number(status.status.last_stable_mci);
             console.log(`local_stable_mci:${local_stable_mci} , last_stable_mci:${last_stable_mci} ,是否getMciBlocks : ${local_stable_mci < last_stable_mci}`);
 
             if (local_stable_mci < last_stable_mci) {
@@ -64,6 +64,10 @@ let pageUtility = {
                 }
                 pageUtility.startInsertData();
             } else {
+                //如果比last_stable_mci大，则置为last_stable_mci；
+                if(local_stable_mci>last_stable_mci){
+                    local_stable_mci = last_stable_mci;
+                }
                 pageUtility.init();
             }
         })
@@ -102,8 +106,7 @@ let pageUtility = {
                             let isFail = pageUtility.isFail(blockInfo);
                             if (isFail) {
                                 console.log("isFail",blockInfo.hash);
-                                //改From，不改To的
-                                //发款方不在当前 accountsTotal 时 （以前已经储存在数据库了）
+                                //当前的交易是失败的
                                 if (!accountsTotal[blockInfo.from]) {
                                     accountsTotal[blockInfo.from] = {
                                         account: blockInfo.from,
@@ -211,9 +214,9 @@ let pageUtility = {
                                             pageUtility.insertTransSQL(blockInfo);
                                         });
                                         pgclient.query('COMMIT', (err) => {
-                                            console.log("不稳定 COMMIT", err);
                                             pageUtility.batchInsertOrUpdateParent(unstableParentsTotal);
-                                            // pageUtility.init();
+                                            console.log("不稳定 COMMIT", err);
+                                            pageUtility.init();
                                         })
                                     })
                                 })
@@ -260,7 +263,53 @@ let pageUtility = {
             ],
         };
         pgclient.query(addBlockSQL, (res) => {
+            let typeVal = Object.prototype.toString.call(res);
+            if (typeVal == '[object Array]') {
+
+            } else if (typeVal == '[object Error]') {
+                console.log("更新",blockInfo.hash);
+                pageUtility.updateTransTask(blockInfo);
+            }
         })
+    },
+    updateTransTask(blockInfo){
+        const sqlOptions = {
+            text: 'UPDATE transaction SET "from"=$2,"to"=$3,amount=$4,previous=$5,witness_list_block=$6,last_summary=$7,last_summary_block=$8,data=$9,exec_timestamp=$10,signature=$11,is_free=$12,level=$13,witnessed_level=$14,best_parent=$15,is_stable=$16,is_fork=$17,is_invalid=$18,is_fail=$19,is_on_mc=$20,mci=$21,latest_included_mci=$22,mc_timestamp=$23 WHERE hash=$1',
+            values: [
+                blockInfo.hash,
+                blockInfo.from,
+                blockInfo.to,
+                blockInfo.amount,
+                blockInfo.previous,
+                blockInfo.witness_list_block,
+                blockInfo.last_summary,
+                blockInfo.last_summary_block,
+                blockInfo.data,
+                Number(blockInfo.exec_timestamp),
+                blockInfo.signature,
+                blockInfo.is_free == '1',
+                Number(blockInfo.level),
+                Number(blockInfo.witnessed_level),
+                blockInfo.best_parent,
+                blockInfo.is_stable == '1',
+                blockInfo.is_fork == '1',
+                blockInfo.is_invalid == '1',
+                blockInfo.is_fail == '1',
+                blockInfo.is_on_mc == '1',
+                Number(blockInfo.mci),
+                Number(blockInfo.latest_included_mci) || 0,
+                Number(blockInfo.mc_timestamp),
+            ],
+        };
+
+        pgclient.query(sqlOptions, (res) => {
+            let typeVal = Object.prototype.toString.call(res);
+            if (typeVal == '[object Array]') {
+
+            } else if (typeVal == '[object Error]') {
+                console.log("Trans更新失败",blockInfo.hash)
+            }
+        });
     },
     batchInsertOrUpdateAccount(accountsTotal) {
         for (account in accountsTotal) {
@@ -294,10 +343,10 @@ let pageUtility = {
         });
     },
     updateAccountTask(accountObj) {
-        //TODO 这么写有BUG啊；需要先获取金额，然后再进行相加
+        //需要先获取金额，然后再进行相加
         pgclient.query("Select * FROM accounts  WHERE account = $1", [accountObj.account], (data) => {
             let currentAccount = data[0];
-            console.log("获取成功啦", currentAccount);
+            // console.log("获取成功啦", currentAccount);
             let targetBalance = BigNumber(currentAccount.balance).plus(accountObj.balance).toString(10);
             let targetTran = BigNumber(currentAccount.tran_count).plus(accountObj.tran_count).toString(10);
             const sqlOptions = {
