@@ -141,7 +141,7 @@ router.get("/get_account_list", function (req, res, next) {
     }
     //TODO 筛选To里 不是失败的
     // is_stable === true  and  is_fork === false and is_invalid === false and is_fail === false
-    pgclient.query('Select COUNT(1) FROM transaction WHERE "from" = $1 OR ("to"=$1 and is_stable = true and  is_fork = false and is_invalid = false and is_fail = false )', [queryAccount], (count) => {
+    pgclient.query('Select COUNT(1) FROM transaction WHERE "from" = $1 OR "to"=$1', [queryAccount], (count) => {
         count = count[0].count;//TODO 这么写有BUG
         // console.log("=>", count)
         pages = Math.ceil(count / LIMITVAL);
@@ -151,7 +151,7 @@ router.get("/get_account_list", function (req, res, next) {
         page = Math.max(page, 1);
         OFFSETVAL = (page - 1) * LIMITVAL;
         // *,balance/sum(balance) 
-        pgclient.query('Select * FROM transaction WHERE "from" = $1 OR ("to"=$1 and is_stable = true and  is_fork = false and is_invalid = false and is_fail = false ) ORDER BY pkid DESC LIMIT ' + LIMITVAL + " OFFSET " + OFFSETVAL, [queryAccount], (data) => {
+        pgclient.query('Select * FROM transaction WHERE "from" = $1 OR "to"=$1 ORDER BY pkid DESC LIMIT ' + LIMITVAL + " OFFSET " + OFFSETVAL, [queryAccount], (data) => {
             if (data == 'error') {
                 responseData = {
                     tx_list: [],
@@ -285,8 +285,10 @@ router.get("/get_previous_units", function (req, res, next) {
         }
     } else if (active_unit) {
         // "(select * from transaction where pkid > (select pkid from transaction where hash = $1 limit 1) limit 60 ) union (select * from transaction where pkid <= (select pkid from transaction where hash = $1 limit 1) limit 60 ) order by pkid desc",
+        //            text: "select * from transaction where pkid > ((select pkid from transaction where hash = $1 limit 1)-49)  and pkid <((select pkid from transaction where hash = $1 limit 1)+50)  order by pkid desc",
+
         sqlOptions = {
-            text: "select * from transaction where pkid > ((select pkid from transaction where hash = $1 limit 1)-49)  and pkid <((select pkid from transaction where hash = $1 limit 1)+50)  order by pkid desc",
+            text: "select * from transaction where pkid > ((select pkid from transaction where hash = $1 limit 1)-49) offset 0 limit 100  order by pkid desc",
             values: [active_unit]
         }
     } else {
@@ -300,6 +302,7 @@ router.get("/get_previous_units", function (req, res, next) {
         var tempEdges = {};
         pgclient.query('BEGIN', (err) => {
             // console.log("BEGIN",sqlOptions,data);
+            //Select * FROM parents WHERE item in ($1) ORDER BY parents_id DESC,[data]
             data.forEach(item => {
                 pgclient.query("Select * FROM parents WHERE item = $1 OR parent=$1 ORDER BY parents_id DESC", [item.hash], function (result) {
                     //result.forEach is not a function
