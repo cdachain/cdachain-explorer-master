@@ -6,6 +6,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 explorer-backend/node_modules/
+explorer-backend/logs/
 explorer-backend/public/static/
 explorer-backend/public/index.html
 explorer-backend/database/config.js

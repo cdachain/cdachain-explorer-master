@@ -6,7 +6,7 @@
         <div class="no-found-des">
             没有找到资源
             <div class="go-home">
-                <a href="/" class="wui-button wui-button-purple-nobg">返回首页</a>
+              <router-link to="/" tag="li" class="wui-button wui-button-purple-nobg">返回首页</router-link>
             </div>
         </div>
     </div>

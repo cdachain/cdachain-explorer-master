@@ -3,6 +3,8 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var fs = require('fs')
+var FileStreamRotator = require('file-stream-rotator')
 
 var app = express();
 
@@ -19,12 +21,25 @@ app.all('/api', function(req, res, next) {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-app.use(logger('dev'));
+/* 
+* 写日志
+*/
+var logDirectory = __dirname + '/logs'
+fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)// 确保日志目录存在
+// create a rotating write stream
+var accessLogStream = FileStreamRotator.getStream({
+  filename: logDirectory + '/explorer-%DATE%.log',
+  frequency: 'daily',
+  verbose: false
+})
+// setup the logger
+app.use(logger('combined', {stream: accessLogStream}))
+// app.use(logger('dev'));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
 
 var indexRouter = require('./routes/index');
 app.use('/', indexRouter);
