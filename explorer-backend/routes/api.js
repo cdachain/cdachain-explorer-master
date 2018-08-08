@@ -1,7 +1,7 @@
 var express = require("express");
 var router = express.Router();
 
-var pgclient = require('../database/PG_ALL');// 引用上述文件
+var pgclient = require('../database/PG');// 引用上述文件
 pgclient.getConnection();
 
 var responseData = null;

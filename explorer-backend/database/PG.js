@@ -1,16 +1,19 @@
 const { Client } = require('pg');
-
-// 数据库配置
+const config = require('./config');
+/* 
 let config = {
-    host: '192.168.10.222',
+    host: '192.168.11.111',
     port: 5432,
-    user: "postgres",
-    password: "abc123456",
+    user: "canonchain"",
+    password: "czr123",
     database: "canonchain_explorer",
     // 扩展属性
     max: 20, // 连接池最大连接数
     idleTimeoutMillis: 3000, // 连接最大空闲时间 3s
 }
+module.exports = config;
+*/
+
 let client = new Client(config);
 
 let PG = function () {

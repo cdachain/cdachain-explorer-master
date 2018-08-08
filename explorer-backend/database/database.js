@@ -3,7 +3,7 @@ let BigNumber = require('bignumber.js').default;
 let Czr = require("../czr/index");
 let czr = new Czr();
 
-let pgclient = require('./PG_ALL');// 引用上述文件
+let pgclient = require('./PG');// 引用上述文件
 pgclient.getConnection();
 
 
