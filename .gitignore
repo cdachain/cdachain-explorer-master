@@ -7,6 +7,7 @@ yarn-debug.log*
 yarn-error.log*
 explorer-backend/node_modules/
 explorer-backend/logs/
+explorer-backend/data_logs/
 explorer-backend/dist/
 explorer-backend/database/config.js
 explorer-front/node_modules/

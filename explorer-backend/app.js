@@ -1,12 +1,12 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var fs = require('fs')
-var FileStreamRotator = require('file-stream-rotator')
+let createError = require('http-errors');
+let express = require('express');
+let path = require('path');
+let cookieParser = require('cookie-parser');
+let logger = require('morgan');
+let fs = require('fs');
+let FileStreamRotator = require('file-stream-rotator');
 
-var app = express();
+let app = express();
 
 app.all('/api', function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -24,24 +24,24 @@ app.set('view engine', 'jade');
 /* 
 * 写日志
 */
-var logDirectory = __dirname + '/logs'
-fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)// 确保日志目录存在
+let logDirectory = __dirname + '/logs';
+fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);// 确保日志目录存在
 // create a rotating write stream
-var accessLogStream = FileStreamRotator.getStream({
+let accessLogStream = FileStreamRotator.getStream({
   filename: logDirectory + '/explorer-%DATE%.log',
   frequency: 'daily',
   verbose: false
-})
+});
 // setup the logger
-app.use(logger('combined', {stream: accessLogStream}))
-// app.use(logger('dev'));
+app.use(logger('combined', {stream: accessLogStream}));
+// app.use(logger('dev'));//combined dev
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'dist')));
 
-var indexRouter = require('./routes/index');
+let indexRouter = require('./routes/index');
 app.use('/', indexRouter);
 app.use('/api', require('./routes/api'));
 

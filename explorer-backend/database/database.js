@@ -6,207 +6,173 @@ let czr = new Czr();
 let pgclient = require('./PG');// 引用上述文件
 pgclient.getConnection();
 
+//写日志
+let log4js = require('./log_config');
+let logger = log4js.getLogger('=>');//此处使用category的值
 
-let local_stable_mci;
-let last_stable_mci;
+let dbStableMci;//本地数据库的最高稳定MCI
+let rpcStableMci;//RPC接口请求到的最高稳定MCI
 
-let shoppingCartMci = 0;//分批次存储时候记录mci
-let tempMci;
-let isStableDone = false;
+let cartMci = 0;//大量数据分批存储时候，用来记录MCI
+let tempMci;//大量数据分批存储时候，临时MCI
+let isStableDone = false;//稳定的MCI是否插入完成
 
-let mciBlocksAry;
-let getRPCTimer = null;
+let stableUnitAry;//用来保存稳定tran的数组；
+let getRpcTimer = null;
 
 
 let pageUtility = {
-    startRun() {
-        let SearchMciOptions = {
+    init() {
+        let SearchOptions = {
             text: "select mci from transaction where (is_stable = $1 and is_fork =$2 and is_invalid=$2 and is_fail=$2) order by pkid desc limit 1",
             values: [true, false]
         };
-        pgclient.query(SearchMciOptions, (data) => {
-            if (data.length > 1) {
-                console.log("get dataCurrentMai is Error");
+        pgclient.query(SearchOptions, (data) => {
+            if (data.length === 0) {
+                dbStableMci = 0;
+            } else if (data.length === 1) {
+                dbStableMci = Number(data[0].mci);
+            } else if (data.length > 1) {
+                logger.info("get dataCurrentMai is Error");
                 return;
             }
-            if (data.length === 0) {
-                local_stable_mci = 0;
-            } else if (data.length === 1) {
-                local_stable_mci = Number(data[0].mci);
-            }
-            console.log(`第一次获取到数据库的数据 :${data}, local_stable_mci:${local_stable_mci}`);
-            pageUtility.init();
+            logger.info(`数据库当前稳定的MCI-dbStableMci : ${dbStableMci}`);
+            pageUtility.readyGetData();
         });
-
     },
-    init() {
-        //更新数据
-        getRPCTimer = setTimeout(function () {
+    readyGetData() {
+        getRpcTimer = setTimeout(function () {
             pageUtility.getRPC()
         }, 2000)
     },
     getRPC() {
-        //获取 status 的 last_stable_mci
+        //获取网络中最新稳定的MCI
         czr.request.status().then(function (status) {
             return status
         }).then(function (status) {
-            last_stable_mci = Number(status.status.last_stable_mci);
-            console.log(`local_stable_mci:${local_stable_mci} , last_stable_mci:${last_stable_mci} ,是否getMciBlocks : ${local_stable_mci < last_stable_mci}`);
+            rpcStableMci = Number(status.status.last_stable_mci);
 
-            if (local_stable_mci < last_stable_mci) {
-                if ((local_stable_mci + 1000) < last_stable_mci) {
+            if (dbStableMci < rpcStableMci) {
+                if ((dbStableMci + 1000) < rpcStableMci) {
                     //数量太多，需要分批插入
-                    shoppingCartMci = local_stable_mci + 1000;
+                    cartMci = dbStableMci + 1000;
                     isStableDone = false;
                 } else {
                     //一次可以插入完
                     isStableDone = true;
                 }
+                logger.info(`dbStableMci:${dbStableMci} , rpcStableMci:${rpcStableMci}, 开始准备插入数据 ${dbStableMci < rpcStableMci}`);
                 pageUtility.startInsertData();
             } else {
-                //如果比last_stable_mci大，则置为last_stable_mci；
-                if(local_stable_mci>last_stable_mci){
-                    local_stable_mci = last_stable_mci;
-                }
-                pageUtility.init();
+                pageUtility.readyGetData();
             }
         })
     },
     startInsertData() {
-        mciBlocksAry = [];
-        console.log("开始准备插入数据");
+        stableUnitAry = [];
         //1、查询所有稳定 block 信息
-        var getMciBlocks = function () {
-            czr.request.mciBlocks(local_stable_mci).then(function (data) {
+        let getUnitByMci = function () {
+            logger.info(`通过稳定MCI值 ${dbStableMci} 获取网络中block信息 BY czr.request.mciBlocks`);
+            czr.request.mciBlocks(dbStableMci).then(function (data) {
                 data.blocks.forEach((item) => {
-                    mciBlocksAry.push(item);
+                    stableUnitAry.push(item);
                 });
-                local_stable_mci++;
+                dbStableMci++;//7001
 
                 //当前是否完成，控制一次插入多少
                 if (isStableDone) {
-                    tempMci = last_stable_mci;
+                    tempMci = rpcStableMci;
                 } else {
-                    tempMci = shoppingCartMci;
+                    tempMci = cartMci;
                 }
 
-                if (local_stable_mci <= tempMci) {
-                    getMciBlocks();
+                if (dbStableMci <= tempMci) {
+                    getUnitByMci();
                 } else {
                     //2、整理稳定并且储存,储存到trans action 表中
-                    mciBlocksAry.sort(function (a, b) {
+                    stableUnitAry.sort(function (a, b) {
                         return Number(a.level) - Number(b.level);
                     });
                     pgclient.query('BEGIN', (err) => {
-                        console.log("稳定 BEGIN", mciBlocksAry.length);
-                        var accountsTotal = {},
+                        logger.info("批量插入稳定Unit Start", stableUnitAry.length);
+                        let accountsTotal = {},
                             parentsTotal = {};
-                        mciBlocksAry.forEach(blockInfo => {
-
-                            let isFail = pageUtility.isFail(blockInfo);
-                            if (isFail) {
-                                console.log("isFail",blockInfo.hash);
-                                //当前的交易是失败的
-                                if (!accountsTotal[blockInfo.from]) {
-                                    accountsTotal[blockInfo.from] = {
-                                        account: blockInfo.from,
-                                        type: 1,
-                                        balance: "0",
-                                        tran_count: 0,
-                                    }
-                                }else{
-                                    accountsTotal[blockInfo.from].tran_count = accountsTotal[blockInfo.from].tran_count + 1;
+                        stableUnitAry.forEach(blockInfo => {
+                            //DO 处理账户
+                            //发款方不在当前 accountsTotal 时 （以前已经储存在数据库了）
+                            if (!accountsTotal.hasOwnProperty(blockInfo.from)) {
+                                accountsTotal[blockInfo.from] = {
+                                    account: blockInfo.from,
+                                    type: 1,
+                                    balance: "0"
                                 }
-                            } else {
-                                /*
-                                @ 处理 account 数据，收款方
-                                */
+                            }
+
+                            let isFail = pageUtility.isFail(blockInfo);//交易失败了
+                            if(!isFail){
+                                //处理收款方
                                 if (accountsTotal.hasOwnProperty(blockInfo.to)) {
                                     //有：更新数据
                                     accountsTotal[blockInfo.to].balance = BigNumber(accountsTotal[blockInfo.to].balance).plus(blockInfo.amount).toString(10);
-                                    accountsTotal[blockInfo.to].tran_count = accountsTotal[blockInfo.to].tran_count + 1;
                                 } else {
                                     //无：写入数据
                                     accountsTotal[blockInfo.to] = {
                                         account: blockInfo.to,
                                         type: 1,
-                                        balance: blockInfo.amount,
-                                        tran_count: 1,
+                                        balance: blockInfo.amount
                                     }
                                 }
-                                //处理 发款方
-                                //发款方不在当前 accountsTotal 时 （以前已经储存在数据库了）
-                                if (!accountsTotal[blockInfo.from]) {
-                                    accountsTotal[blockInfo.from] = {
-                                        account: blockInfo.from,
-                                        type: 1,
-                                        balance: "0",
-                                        tran_count: 0,
-                                    }
-                                }
-                                if (blockInfo.from != blockInfo.to) {
-                                    //如果不是自己转
+                                //处理发款方
+                                if (Number(blockInfo.level) !== 0) {
                                     accountsTotal[blockInfo.from].balance = BigNumber(accountsTotal[blockInfo.from].balance).minus(blockInfo.amount).toString(10);
-                                    accountsTotal[blockInfo.from].tran_count = accountsTotal[blockInfo.from].tran_count + 1;
-                                } else {
-                                    //如果是自己转给自己
-                                    if (blockInfo.level != 0) {
-                                        accountsTotal[blockInfo.from].balance = BigNumber(accountsTotal[blockInfo.from].balance).minus(blockInfo.amount).toString(10);
-                                    }
                                 }
+                            }else{
+                                logger.info("失败的Unit Hash ",blockInfo.hash);//当前的交易是失败的
                             }
 
-                            /* 
-                            @ 处理 parents 数据
-                            */
+                            //DO 处理 parents 数据
                             if (blockInfo.parents.length > 0) {
                                 //当有 parents 时候
                                 parentsTotal[blockInfo.hash] = blockInfo.parents;
                             }
 
-                            /* 
-                            @ 批量insertTransSQL
-                            */
+                            //DO 批量insertTransSQL
                             pageUtility.insertTransSQL(blockInfo);
 
                         });
                         pgclient.query('COMMIT', (err) => {
                             pageUtility.batchInsertOrUpdateAccount(accountsTotal);
                             pageUtility.batchInsertOrUpdateParent(parentsTotal);
-                            console.log("稳定 COMMIT", err, Object.keys(parentsTotal).length);
+                            logger.info("批量插入稳定Unit End", err, Object.keys(stableUnitAry).length);
 
                             //Other
-                            console.log("isStableDone", isStableDone);
-                            console.log(`local_stable_mci :${local_stable_mci },last_stable_mci:${last_stable_mci},tempMci:${tempMci}`);
+                            logger.info(`是否插入不稳定Unit:${isStableDone} dbStableMci:${dbStableMci }, rpcStableMci:${rpcStableMci}, tempMci:${tempMci} isStableDone:${isStableDone}`);
                             if (!isStableDone) {
-                                //没有完成,处理shoppingCartMci 和 isDone
-                                if ((shoppingCartMci + 1000) < last_stable_mci) {
+                                //没有完成,处理 cartMci 和 isDone
+                                if ((cartMci + 1000) < rpcStableMci) {
                                     //数量太多，需要分批插入
-                                    shoppingCartMci += 1000;
+                                    cartMci += 1000;
                                     isStableDone = false;
                                 } else {
                                     //下一次可以插入完
-                                    shoppingCartMci = last_stable_mci;
+                                    cartMci = rpcStableMci;
                                     isStableDone = true;
                                 }
-                                mciBlocksAry = [];
-                                getMciBlocks();
+                                stableUnitAry = [];
+                                getUnitByMci();
                             } else {
-                                //完成了
                                 //最后：获取 不稳定的unstable_blocks 存储
                                 czr.request.unstableBlocks().then(function (data) {
-                                    var unstableBlocksAry = data.blocks;
+                                    let unstableUnitAry = data.blocks;
                                     //排序 level 由小到大
-                                    unstableBlocksAry.sort(function (a, b) {
+                                    unstableUnitAry.sort(function (a, b) {
                                         return Number(a.level) - Number(b.level);
                                     });
                                     pgclient.query('BEGIN', (err) => {
-                                        console.log("不稳定 BEGIN", err);
-                                        var unstableParentsTotal = {};
-                                        unstableBlocksAry.forEach(blockInfo => {
-                                            /*
-                                            @ 处理 parents 数据
-                                            */
+                                        logger.info("批量插入不稳定Unit Start", err);
+                                        let unstableParentsTotal = {};
+                                        unstableUnitAry.forEach(blockInfo => {
+                                            //处理 parents 数据
                                             if (blockInfo.parents.length > 0) {
                                                 //当有 parents 时候
                                                 unstableParentsTotal[blockInfo.hash] = blockInfo.parents;
@@ -215,8 +181,8 @@ let pageUtility = {
                                         });
                                         pgclient.query('COMMIT', (err) => {
                                             pageUtility.batchInsertOrUpdateParent(unstableParentsTotal);
-                                            console.log("不稳定 COMMIT", err);
-                                            pageUtility.init();
+                                            logger.info("批量插入不稳定Unit End", err);
+                                            pageUtility.readyGetData();
                                         })
                                     })
                                 })
@@ -230,10 +196,9 @@ let pageUtility = {
                 }
             })
         };
-        getMciBlocks();
+        getUnitByMci();
     },
     insertTransSQL(blockInfo) {
-        // console.log("插入", blockInfo.hash)
         const addBlockSQL = {
             text: 'INSERT INTO transaction(hash,"from","to",amount,previous,witness_list_block,last_summary,last_summary_block,data,exec_timestamp,signature,is_free,level,witnessed_level,best_parent,is_stable,is_fork,is_invalid,is_fail,is_on_mc,mci,latest_included_mci,mc_timestamp) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)',
             values: [
@@ -264,10 +229,9 @@ let pageUtility = {
         };
         pgclient.query(addBlockSQL, (res) => {
             let typeVal = Object.prototype.toString.call(res);
-            if (typeVal == '[object Array]') {
-
-            } else if (typeVal == '[object Error]') {
-                console.log("更新",blockInfo.hash);
+            // if (typeVal == '[object Array]') {
+            if (typeVal == '[object Error]') {
+                logger.info(`Unit ${blockInfo.hash} 插入Unit失败，开始更新...`);
                 pageUtility.updateTransTask(blockInfo);
             }
         })
@@ -304,40 +268,37 @@ let pageUtility = {
 
         pgclient.query(sqlOptions, (res) => {
             let typeVal = Object.prototype.toString.call(res);
-            if (typeVal == '[object Array]') {
-
-            } else if (typeVal == '[object Error]') {
-                console.log("Trans更新失败",blockInfo.hash)
+            if (typeVal === '[object Error]') {
+                logger.info(`Unit ${blockInfo.hash} 更新失败 ,Error=>${res}`);
+                logger.info(`再次更新 Unit ${blockInfo.hash} `);
+                pageUtility.updateTransTask(blockInfo);
             }
         });
     },
     batchInsertOrUpdateAccount(accountsTotal) {
-        for (account in accountsTotal) {
-            // console.log("batchInsertOrUpdateAccount ==> ", account)
+        for (let account in accountsTotal) {
             pageUtility.addAccountTask(accountsTotal[account])
         }
     },
     batchInsertOrUpdateParent(parentsTotalObj) {
-        //hash:['hax1','hash2']
-        for (hash in parentsTotalObj) {
-            // console.log("batchInsertOrUpdateParent ==> ", hash,parentsTotalObj[hash])
+        for (let hash in parentsTotalObj) {
             parentsTotalObj[hash].forEach(parent => {
                 //没有则插入 item:hash parent:parent
                 pageUtility.insertParentsTask(hash, parent);
             })
         }
     },
+
     addAccountTask(accountObj) {
         const sqlOptions = {
-            text: "INSERT INTO accounts(account,type,tran_count,balance) VALUES($1,$2,$3,$4)",
-            values: [accountObj.account, 1, accountObj.tran_count, accountObj.balance]
+            text: "INSERT INTO accounts(account,type,balance) VALUES($1,$2,$3)",
+            values: [accountObj.account, 1, accountObj.balance]
         };
         pgclient.query(sqlOptions, (res) => {
-            var typeVal = Object.prototype.toString.call(res);
-            if (typeVal == '[object Array]') {
-                // console.log("addAccountTask", accountObj.account, 'Success')
-            } else if (typeVal == '[object Error]') {
-                // console.log("addAccountTask", accountObj.account, 'Error,去更新')
+            let typeVal = Object.prototype.toString.call(res);
+            if (typeVal === '[object Error]') {
+                logger.info(`插入Account失败 ${accountObj.account} Error=>${res}`);
+                logger.info(`开始更新 ${accountObj.account}`);
                 pageUtility.updateAccountTask(accountObj);
             }
         });
@@ -346,33 +307,33 @@ let pageUtility = {
         //需要先获取金额，然后再进行相加
         pgclient.query("Select * FROM accounts  WHERE account = $1", [accountObj.account], (data) => {
             let currentAccount = data[0];
-            // console.log("获取成功啦", currentAccount);
             let targetBalance = BigNumber(currentAccount.balance).plus(accountObj.balance).toString(10);
-            let targetTran = BigNumber(currentAccount.tran_count).plus(accountObj.tran_count).toString(10);
             const sqlOptions = {
-                text: "UPDATE accounts SET balance=$2,tran_count=$3 WHERE account=$1",
-                values: [accountObj.account, targetBalance, targetTran]
+                text: "UPDATE accounts SET balance=$2 WHERE account=$1",
+                values: [accountObj.account, targetBalance]
             };
             pgclient.query(sqlOptions, (res) => {
-                var typeVal = Object.prototype.toString.call(res);
-                if (typeVal == '[object Array]') {
-                    console.log("updateAccountTask", accountObj.account, 'Success')
-                } else if (typeVal == '[object Error]') {
-                    console.log("updateAccountTask", accountObj.account, 'Error')
+                let typeVal = Object.prototype.toString.call(res);
+                if (typeVal === '[object Error]') {
+                    logger.info(`更新账户失败 ${accountObj.account} Error=>${res}`);
+                    logger.info(`再次更新账户 ${accountObj.account}`);
+                    pageUtility.updateAccountTask(accountObj);
                 }
             });
         });
-
-
     },
+
     insertParentsTask(hash, parentHash) {
         const sqlOptions = {
             text: "INSERT INTO parents(item,parent) VALUES($1,$2)",
             values: [hash, parentHash]
         };
         pgclient.query(sqlOptions, (res) => {
-            if (res == 'error') {
-                console.log("insertParentsTask", res)
+            let typeVal = Object.prototype.toString.call(res);
+            if (typeVal === '[object Error]') {
+                logger.info(`插入parent失败 ${hash} - ${parentHash} Error=>${res}`);
+                logger.info(`再次插入parent`);
+                pageUtility.insertParentsTask(hash, parentHash);
             }
         });
     },
@@ -381,4 +342,4 @@ let pageUtility = {
         return (obj.is_stable === "1") && ((obj.is_fork === "1") || (obj.is_invalid === "1") || (obj.is_fail === "1"));
     }
 };
-pageUtility.startRun();
+pageUtility.init();
