@@ -62,7 +62,7 @@ router.get("/get_accounts", function (req, res, next) {
         page = Number(queryPage) || 1;
     }
     pgclient.query("Select COUNT(1) FROM accounts", (count) => {
-        count = count[0].count;
+        count = count[0].count;//TODO 这么写有BUG  Cannot read property 'count' of undefined
         pages = Math.ceil(count / LIMITVAL);
         //paga 不大于 pages
         page = Math.min(pages, page);
@@ -142,7 +142,7 @@ router.get("/get_account_list", function (req, res, next) {
     //TODO 筛选To里 不是失败的
     // is_stable === true  and  is_fork === false and is_invalid === false and is_fail === false
     pgclient.query('Select COUNT(1) FROM transaction WHERE "from" = $1 OR "to"=$1', [queryAccount], (count) => {
-        count = count[0].count;//TODO 这么写有BUG
+        count = count[0].count;//TODO 这么写有BUG  Cannot read property 'count' of undefined
         // console.log("=>", count)
         pages = Math.ceil(count / LIMITVAL);
         //paga 不大于 pages
@@ -202,7 +202,8 @@ router.get("/get_transactions", function (req, res, next) {
         page = Number(queryPage) || 1;
     }
     pgclient.query("Select COUNT(1) FROM transaction", (count) => {
-        count = count[0].count;
+        console.log("count",count)
+        count = count[0].count;//TODO 这么写有BUG  Cannot read property 'count' of undefined
         // console.log("->", count)
         pages = Math.ceil(count / LIMITVAL);
         //paga 不大于 pages
@@ -285,25 +286,29 @@ router.get("/get_previous_units", function (req, res, next) {
         }
     } else if (active_unit) {
         // "(select * from transaction where pkid > (select pkid from transaction where hash = $1 limit 1) limit 60 ) union (select * from transaction where pkid <= (select pkid from transaction where hash = $1 limit 1) limit 60 ) order by pkid desc",
-        //            text: "select * from transaction where pkid > ((select pkid from transaction where hash = $1 limit 1)-49)  and pkid <((select pkid from transaction where hash = $1 limit 1)+50)  order by pkid desc",
+        //text: "select * from transaction where pkid > ((select pkid from transaction where hash = $1 limit 1)-49)  and pkid <((select pkid from transaction where hash = $1 limit 1)+50)  order by pkid desc",
+        //text: "select * from transaction where pkid > ((select pkid from transaction where hash = $1 order by pkid desc limit 1 )-49) order by pkid offset 0 limit 100 "
 
         sqlOptions = {
-            text: "select * from transaction where pkid > ((select pkid from transaction where hash = $1 limit 1)-49) offset 0 limit 100  order by pkid desc",
+            text: "select * from transaction where pkid < ((select pkid from transaction where hash = $1 order by pkid desc limit 1 )+50) order by pkid  desc offset 0 limit 100 ",
             values: [active_unit]
         }
     } else {
         sqlOptions = "Select * FROM transaction ORDER BY pkid DESC limit 100"
     }
     console.log("sqlOptions",sqlOptions)
-
-
     pgclient.query(sqlOptions, (data) => {
         // pgclient.query("Select * FROM transaction WHERE pkid < $1 ORDER BY pkid DESC limit 20", [pkid], (data) => {
         var tempEdges = {};
         pgclient.query('BEGIN', (err) => {
             // console.log("BEGIN",sqlOptions,data);
             //Select * FROM parents WHERE item in ($1) ORDER BY parents_id DESC,[data]
+            //TODO 这里会挂的，当没unit；需要改好
+            if(data.length!==100){
+                console.log(data);
+            }
             data.forEach(item => {
+                //Select * FROM parents WHERE item = $1 OR parent=$1 ORDER BY parents_id DESC
                 pgclient.query("Select * FROM parents WHERE item = $1 OR parent=$1 ORDER BY parents_id DESC", [item.hash], function (result) {
                     //result.forEach is not a function
                     // console.log("error Error=>", result.length)
@@ -334,7 +339,7 @@ router.get("/get_previous_units", function (req, res, next) {
                     code: 0,
                     message: "success"
                 };
-                // console.log("responseData")
+                console.log("responseData")
                 res.json(responseData);
 
             });
