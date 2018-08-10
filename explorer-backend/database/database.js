@@ -401,6 +401,7 @@ let pageUtility = {
             let typeVal = Object.prototype.toString.call(res);
             if (typeVal === '[object Error]') {
                 logger.info(`Unit更新失败 ${blockInfo.hash}`);
+                logger.error(sqlOptions);
                 logger.error(res);
                 logger.info(`再次更新Unit ${blockInfo.hash} `);
                 pageUtility.updateTransTask(blockInfo);
