@@ -38,13 +38,17 @@ PG.prototype.getConnection = function () {
     });
 };
 PG.prototype.query = function (sqlStr, values, cb) {
+
+    // pglogger.info("转BUFFER");
+    // pglogger.info(client.connection.writer.buffer);
+
     let typeVal = Object.prototype.toString.call(values);
     if (typeVal === "[object Function]") {
         //查
         pglogger.info(sqlStr);
         cb = values;
         client.query(sqlStr,function (err, result) {
-            pglogger.info(`结果,err ${err},result:${result}`);
+            // pglogger.info(`结果,err ${err},result:${result}`);
             if (err) {
                 cb(err);
             } else {
@@ -57,7 +61,7 @@ PG.prototype.query = function (sqlStr, values, cb) {
         });
     } else {
         //插入
-        pglogger.info(sqlStr,values);
+        // pglogger.info(`${sqlStr},${values}`);
 
         client.query(sqlStr,values, function (err, result) {
             if (err) {
