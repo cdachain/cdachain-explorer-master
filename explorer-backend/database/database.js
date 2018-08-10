@@ -94,9 +94,7 @@ let pageUtility = {
                         return Number(a.level) - Number(b.level);
                     });
 
-                    /*pgclient.query('BEGIN', (err) => {
-                        //shouldAbort
-                        // if (pageUtility.shouldAbort(err)) return;
+                    pgclient.query('BEGIN', () => {
                         logger.info("批量插入稳定Unit Start", stableUnitAry.length);
                         let accountsTotal = {},
                             parentsTotal = {};
@@ -194,11 +192,11 @@ let pageUtility = {
 
 
                         })
-                    });*/
+                    });
 
 
                     // **** 以前的
-                    pgclient.query('BEGIN', (err) => {
+                    /*pgclient.query('BEGIN', (err) => {
                         logger.info("批量插入稳定Unit Start", stableUnitAry.length);
                         let accountsTotal = {},
                             parentsTotal = {};
@@ -247,9 +245,11 @@ let pageUtility = {
                                 pageUtility.insertTransSQL(blockInfo);
                                 pageUtility.batchInsertOrUpdateParent(parentsTotal);
                                 parentsTotal={};
+                                pageUtility.batchInsertOrUpdateAccount(accountsTotal);
+                                accountsTotal={};
                             });
                             pgclient.query('COMMIT', (err) => {
-                                pageUtility.batchInsertOrUpdateAccount(accountsTotal);
+
 
                                 logger.info("批量插入稳定Unit End", err, Object.keys(stableUnitAry).length);
 
@@ -317,7 +317,7 @@ let pageUtility = {
                                 logger.error(info);
                             })
                         }
-                    });
+                    });*/
 
 
                 }

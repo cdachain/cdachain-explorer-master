@@ -1,5 +1,10 @@
 const { Client } = require('pg');
 const config = require('./config');
+
+//写日志
+let log4js = require('./log_config');
+let pglogger = log4js.getLogger('PGSQL');//此处使用category的值
+
 /* 
 let config = {
     host: '192.168.11.111',
@@ -17,29 +22,29 @@ module.exports = config;
 let client = new Client(config);
 
 let PG = function () {
-    console.log("准备数据库连接...");
+    pglogger.info("准备数据库连接...");
 };
 PG.prototype.getConnection = function () {
     client.connect(function (err) {
         if (err) {
-            return console.error('数据库链接失败:', err);
+            return pglogger.error('数据库链接失败:', err);
         }
         client.query('SELECT NOW() AS "theTime"', function (err, result) {
             if (err) {
-                return console.error('error running query', err);
+                return pglogger.error('error running query', err);
             }
-            console.log("数据库连接成功...");
+            pglogger.info("数据库连接成功...");
         });
     });
 };
 PG.prototype.query = function (sqlStr, values, cb) {
-    var typeVal = Object.prototype.toString.call(values);
-    // console.log(`RUN=> client.query(${sqlStr} , ${values} ) `)
-    if (typeVal == "[object Function]") {
+    let typeVal = Object.prototype.toString.call(values);
+    if (typeVal === "[object Function]") {
         //查
+        pglogger.info(sqlStr);
         cb = values;
         client.query(sqlStr,function (err, result) {
-            // console.log("result",err,result) 
+            pglogger.info(`结果,err ${err},result:${result}`);
             if (err) {
                 cb(err);
             } else {
@@ -52,6 +57,8 @@ PG.prototype.query = function (sqlStr, values, cb) {
         });
     } else {
         //插入
+        pglogger.info(sqlStr,values);
+
         client.query(sqlStr,values, function (err, result) {
             if (err) {
                 cb(err);
