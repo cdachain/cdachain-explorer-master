@@ -25,8 +25,6 @@
                             </el-table-column>
                             <el-table-column prop="proportion" label="占比" align="right" min-width="150">
                             </el-table-column>
-                            <el-table-column prop="tran_count" label="交易数" align="right" width="70">
-                            </el-table-column>
                         </el-table>
                     </template>
                 </div>
