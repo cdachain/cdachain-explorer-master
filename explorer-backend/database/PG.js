@@ -52,7 +52,7 @@ PG.prototype.query = function (sqlStr, values, cb) {
             if (err) {
                 cb(err);
             } else {
-                if (result.rows != undefined) {
+                if (result.rows !== undefined) {
                     cb(result.rows);
                 } else {
                     cb();
@@ -61,8 +61,7 @@ PG.prototype.query = function (sqlStr, values, cb) {
         });
     } else {
         //插入
-        // pglogger.info(`${sqlStr},${values}`);
-
+        pglogger.info(`${sqlStr},${values}`);
         client.query(sqlStr,values, function (err, result) {
             if (err) {
                 cb(err);

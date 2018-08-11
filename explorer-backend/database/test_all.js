@@ -242,90 +242,16 @@ pgclient.query(batchInsertSql, (res) => {
     //ROLLBACK
 });*/
 
-blockAry=[ { hash: 'BE66718F5EA8DDD7A8A3CA1B0277ECD22874923CFB0AC97623646B1450198950',
-    from: 'czr_3jzwa1n6onrayxibnkkd5w6y8dtk9fry73nfa7bnmrmmddm3nrtsau59dpat',
-    to: 'czr_3n6mthg1b8p7an5fzojyhwg1ew4hwzdpirqbifo5i37micu8xtfuzfoyh8a5',
-    amount: '0',
-    previous: '339AE88B648B3342C5289B665BF498363E75247E6BA945D695BD4DE785FA07FD',
-    parents: [ '10F5F445FCCE1841073BA56F1EE8AEF76997F51A4047051010B20CE595B83C88' ],
-    witness_list_block: '3B3913B57AA353BFA4C722EEC259FCCA0028A5D1D4C2D62883A4151D0267A743',
-    witness_list: '',
-    last_summary: 'B47F98A29F3E7CF59A0266EB30AEF9BCCD22A272953E7F9034C839E7F5470B24',
-    last_summary_block: '3A5CFC030821B6E922658A01135F802201655AA5EEC36D3EAC35F09C5626ED83',
-    data: '',
-    exec_timestamp: '1533888257',
-    signature: '4F7AB686B654AF4ECD35FC4F54706AAB136648FEDE694ED25FF6D357256AE95570411C81CC44074199C69A89A9A037A2B00433913241293BEFE2AB8080701E02',
-    is_free: '0',
-    level: '10857',
-    witnessed_level: '10850',
-    best_parent: '10F5F445FCCE1841073BA56F1EE8AEF76997F51A4047051010B20CE595B83C88',
-    is_stable: '1',
-    is_fork: '0',
-    is_invalid: '0',
-    is_fail: '0',
-    is_on_mc: '1',
-    mci: '9712',
-    latest_included_mci: '9711',
-    mc_timestamp: '1533888257' },
-    { hash: '55ABE594B4A47D1505E332CDC289D04E071F3619710745317316557B593934CA',
-        from: 'czr_3n6mthg1b8p7an5fzojyhwg1ew4hwzdpirqbifo5i37micu8xtfuzfoyh8a5',
-        to: 'czr_3jzwa1n6onrayxibnkkd5w6y8dtk9fry73nfa7bnmrmmddm3nrtsau59dpat',
-        amount: '0',
-        previous: '0000000000000000000000000000000000000000000000000000000000000000',
-        parents: [ 'BE66718F5EA8DDD7A8A3CA1B0277ECD22874923CFB0AC97623646B1450198950' ],
-        witness_list_block: '3B3913B57AA353BFA4C722EEC259FCCA0028A5D1D4C2D62883A4151D0267A743',
-        witness_list: '',
-        last_summary: '1BDF30D348515918D5717DE84CE01F2A2EC4335119A3622259FA892DF8806426',
-        last_summary_block: '8BF508DB436A203E493D8A3D432DF3DCF00A34B8D7CBDC7297615B2F229D5E8E',
-        data: '',
-        exec_timestamp: '1533888257',
-        signature: '933CD9B144D93C93140810EC91AB74DD58645B05A33D2BB94470B59A86385B2F6FF5D2685BCA6162FF8F374F34DD8D26F1903DDF46DB771BE7F33DEB94EC7C07',
-        is_free: '0',
-        level: '10858',
-        witnessed_level: '10850',
-        best_parent: 'BE66718F5EA8DDD7A8A3CA1B0277ECD22874923CFB0AC97623646B1450198950',
-        is_stable: '1',
-        is_fork: '0',
-        is_invalid: '0',
-        is_fail: '0',
-        is_on_mc: '1',
-        mci: '9713',
-        latest_included_mci: '9712',
-        mc_timestamp: '1533888257' }];
+/*批量更新*/
+//UPDATE [MyTable] SET [MyField1]=Value1,[MyField2]=Value2 WHERE [ConditionField]=SomeValue
+//UPDATE accounts SET balance=$2,count=$3 WHERE account=$1
+//update accounts set balance=tmp.balance from (values ('AAA','1'),('BBB','2'),('CCC','3')) as tmp (account,balance) where accounts.account=tmp.account;
 
-let tempAry=[];
-blockAry.forEach((item)=>{
-    tempAry.push(
-        "('"+
-        item.hash+"','"+
-        item.from+"','"+
-        item.to+"','"+
-        item.amount+"','"+
-        item.previous+"','"+
-        item.witness_list_block+"','"+
-        item.last_summary+"','"+
-        item.last_summary_block+"','"+
-        item.data+"',"+
-        Number(item.exec_timestamp)+",'"+
-        item.signature+"',"+
-        (item.is_free==='1')+",'"+
-        item.level+"','"+
-        item.witnessed_level+"','"+
-        item.best_parent+"',"+
-        (item.is_stable==='1')+","+
-        (item.is_fork==='1')+","+
-        (item.is_invalid==='1')+","+
-        (item.is_fail==='1')+","+
-        (item.is_on_mc==='1')+","+
-        Number(item.mci)+","+
-        (Number(item.latest_included_mci)||0)+","+
-        Number(item.mc_timestamp)+
-        ")");
-});
-let batchInsertSql = {
-    text: 'INSERT INTO transaction(hash,"from","to",amount,previous,witness_list_block,last_summary,last_summary_block,data,exec_timestamp,signature,is_free,level,witnessed_level,best_parent,is_stable,is_fork,is_invalid,is_fail,is_on_mc,mci,latest_included_mci,mc_timestamp) VALUES'+tempAry.toString()
-};
-pgclient.query(batchInsertSql, (res) => {
+let batchUpdateSql="update transaction set is_free=tmp.is_free , is_stable=tmp.is_stable , is_fork=tmp.is_fork , is_invalid=tmp.is_invalid , is_fail=tmp.is_fail , is_on_mc=tmp.is_on_mc from (values " +
+    "('B5956299E1BC73B23A56D4CC1C58D42F2D494808FBDEE073259B48F571CCE97C',false,false,false,false,false,false)," +
+    "('5F2B6FA741A33CDD506C5E150E37FCC73842082B24948A7159DFEB4C07500A08',false,false,false,false,false,false)" +
+    ") as tmp (hash,is_free,is_stable,is_fork,is_invalid,is_fail,is_on_mc) where transaction.hash=tmp.hash";
+pgclient.query(batchUpdateSql, (res) => {
     //ROLLBACK
     console.log(res);
 });
