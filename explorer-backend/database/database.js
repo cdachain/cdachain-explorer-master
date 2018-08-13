@@ -487,7 +487,6 @@ let pageUtility = {
         let batchInsertSql = {
             text: 'INSERT INTO transaction(hash,"from","to",amount,previous,witness_list_block,last_summary,last_summary_block,data,exec_timestamp,signature,is_free,level,witnessed_level,best_parent,is_stable,is_fork,is_invalid,is_fail,is_on_mc,mci,latest_included_mci,mc_timestamp) VALUES'+tempAry.toString()
         };
-        console.log(batchInsertSql);
         pgclient.query(batchInsertSql, (res) => {
             //ROLLBACK
             if(pageUtility.shouldAbort(res,"batchInsertBlock")){
