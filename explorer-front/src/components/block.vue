@@ -28,7 +28,10 @@
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">
-                            <template>
+                            <template v-if="isSuccess === false">
+                                <span class="txt-info"> 暂无信息 </span>
+                            </template>
+                            <template v-else>
                                 <template v-if="blockInfo.is_stable === false">
                                     <span class="txt-warning">
                                         等待确认
@@ -61,7 +64,8 @@
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">
-                            <router-link :to="'/account/'+blockInfo.from">{{blockInfo.from || '-'}}</router-link>
+                            <span  v-if="isSuccess === false">-</span>
+                            <router-link v-else :to="'/account/'+blockInfo.from">{{blockInfo.from || '-'}}</router-link>
                         </div>
                     </div>
                     <div class="block-item-des">
@@ -69,7 +73,8 @@
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">
-                            <router-link :to="'/account/'+blockInfo.to">{{blockInfo.to || '-'}}</router-link>
+                            <span  v-if="isSuccess === false">-</span>
+                            <router-link v-else :to="'/account/'+blockInfo.to">{{blockInfo.to || '-'}}</router-link>
                         </div>
                     </div>
                     <div class="block-item-des">
@@ -86,9 +91,7 @@
                     </div>
                 </div>
             </div>
-
         </div>
-
     </div>
 </template>
 
@@ -107,6 +110,7 @@ export default {
     data() {
         return {
             blockHash: this.$route.params.id,
+            isSuccess:false,
             blockInfo: {
                 from: "-",
                 to: "-",
@@ -154,6 +158,7 @@ export default {
                         response.data.message
                     );
                     if (response.data.message != "error") {
+                        self.isSuccess = response.data.success;
                         self.blockInfo = response.data.transaction;
                     }
 
