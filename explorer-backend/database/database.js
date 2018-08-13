@@ -8,7 +8,7 @@ pgclient.getConnection();
 
 //写日志
 let log4js = require('./log_config');
-let logger = log4js.getLogger('=>');//此处使用category的值
+let logger = log4js.getLogger('write_db');//此处使用category的值
 
 let dbStableMci;//本地数据库的最高稳定MCI
 let rpcStableMci;//RPC接口请求到的最高稳定MCI
