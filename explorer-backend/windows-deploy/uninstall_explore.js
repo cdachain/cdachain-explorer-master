@@ -1,6 +1,6 @@
 let Service = require('node-windows').Service;
 let path = require('path');
-let pathStr=path.join(__dirname, '../database/database.js');
+let pathStr=path.join(__dirname, '../bin/www');
 console.log("local:",pathStr);
 
 //浏览器服务

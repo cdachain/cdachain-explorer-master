@@ -11,12 +11,12 @@
                     <span class="sub_header-des"> {{blockHash}} </span>
                 </div>
                 <div class="bui-dlist">
-                    <div class="block-item-des">
+                    <!-- <div class="block-item-des">
                         <strong class="bui-dlist-tit">交易号
                             <span class="space-des"></span>
                         </strong>
                         <div class="bui-dlist-det">{{blockHash}}</div>
-                    </div>
+                    </div> -->
                     <div class="block-item-des">
                         <strong class="bui-dlist-tit">发送时间
                             <span class="space-des"></span>
