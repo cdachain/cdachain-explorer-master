@@ -153,10 +153,6 @@ export default {
                     }
                 })
                 .then(function(response) {
-                    console.log(
-                        "response.data.message ",
-                        response.data.message
-                    );
                     if (response.data.message != "error") {
                         self.isSuccess = response.data.success;
                         self.blockInfo = response.data.transaction;

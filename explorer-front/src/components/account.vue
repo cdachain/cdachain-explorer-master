@@ -184,7 +184,6 @@ export default {
                     }
                 })
                 .then(function(response) {
-                    console.log("response", response.data);
                     self.accountInfo.balance = response.data.account.balance;
                     self.accountInfo.tran_count =
                         response.data.account.tran_count;

@@ -165,7 +165,6 @@ export default {
     filters: {
         toCZRVal: function(val) {
             let tempVal = self.$czr.utils.fromWei(val, "czr");
-            console.log("tempVal", tempVal);
             return tempVal; //TODO Keep 4 decimal places
         },
         toDate: function(val) {

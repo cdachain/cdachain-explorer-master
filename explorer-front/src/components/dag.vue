@@ -278,7 +278,7 @@ export default {
             // lastUnit = nodes[nodes.length - 1].rowid;
             firstPkid = nodes[0].pkid;
             lastPkid = nodes[nodes.length - 1].pkid;
-            console.log(firstPkid,lastPkid)
+            // console.log(firstPkid,lastPkid)
             phantoms = {};
             phantomsTop = {};
             notStable = [];
@@ -302,7 +302,7 @@ export default {
             self.activeUnit = location.hash.substr(6);
             if (self.activeUnit) {
                 notLastUnitUp = true;
-                console.log("self.highlightNode",self.activeUnit)
+                // console.log("self.highlightNode",self.activeUnit)
                 self.highlightNode(self.activeUnit);
 
             }
@@ -375,7 +375,7 @@ export default {
                 notLastUnitUp = true;
                 self.getStar(location.hash.substr(6));
             }
-            console.log("start")
+            // console.log("start")
         },
         getStar(searchUnit) {
             self.loadingSwitch = true;
@@ -396,7 +396,7 @@ export default {
                     nodes = response.data.units.nodes;
                     edges = response.data.units.edges;
                     self.loadingSwitch = false;
-                    console.log("response",response.data.units.nodes.length,self.loadingSwitch);
+                    // console.log("response",response.data.units.nodes.length,self.loadingSwitch);
                     self.init(nodes, edges);
                     notLastUnitDown = true;
                     if (bWaitingForHighlightNode) {
@@ -662,9 +662,7 @@ export default {
 
             var el = _cy.getElementById(unit); //获取将要高亮的DOM
 
-          console.log("highlightNode   _cy",el.length ,
-            phantoms[unit] === undefined ,
-            phantomsTop[unit] === undefined);
+        //   console.log("highlightNode   _cy",el.length ,phantoms[unit] === undefined ,phantomsTop[unit] === undefined);
             if (
                 el.length &&
                 phantoms[unit] === undefined &&
@@ -698,7 +696,7 @@ export default {
             } else {
                 waitGo = unit;
                 self.getHighlightNode(waitGo);
-                console.log("再去高亮，因为当前没有这个节点啊")
+                // console.log("再去高亮，因为当前没有这个节点啊")
             }
             return false;
         },
@@ -728,7 +726,7 @@ export default {
             if (!bWaitingForHighlightNode) {
                 // 高亮当前元素
                 self.getStar(unit);
-                console.log("高亮当前元素");
+                // console.log("高亮当前元素");
                 bWaitingForHighlightNode = true;
             }
         },
@@ -1011,7 +1009,7 @@ export default {
         goToTop: function() {
             if (notLastUnitUp) {
                 self.getStar();
-              console.log("返回顶部")
+            //   console.log("返回顶部")
             } else {
                 var el = _cy.getElementById(nodes[0].data.unit);
                 _cy.stop();
