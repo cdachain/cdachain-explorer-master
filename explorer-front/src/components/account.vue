@@ -52,7 +52,7 @@
                                             </el-button>
                                         </template>
                                         <template v-else>
-                                            <template v-if="scope.row.mci <= 0">
+                                            <template v-if="Number(scope.row.level) <= 0">
                                                 <span class="table-long-item">Gene</span>
                                             </template>
                                             <template v-else>

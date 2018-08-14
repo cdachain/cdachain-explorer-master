@@ -88,7 +88,7 @@ router.get("/get_accounts", function (req, res, next) {
             page = Math.max(page, 1);
             OFFSETVAL = (page - 1) * LIMITVAL;
             // *,balance/sum(balance) 
-            pgclient.query("Select * FROM accounts ORDER BY balance DESC LIMIT $1 OFFSET $2", [LIMITVAL, OFFSETVAL], (data) => {
+            pgclient.query("Select account,balance FROM accounts ORDER BY balance DESC LIMIT $1 OFFSET $2", [LIMITVAL, OFFSETVAL], (data) => {
                 //改造数据 排名 , 金额，占比
                 let typeVal = Object.prototype.toString.call(data);
                 if (typeVal === '[object Error]') {
@@ -140,14 +140,14 @@ router.get("/get_accounts", function (req, res, next) {
 //获取账号信息
 router.get("/get_account", function (req, res, next) {
     var queryAccount = req.query.account;// ?account=2
-    pgclient.query("Select * FROM accounts  WHERE account = $1", [queryAccount], (data) => {
+    pgclient.query("Select account,balance FROM accounts  WHERE account = $1", [queryAccount], (data) => {
         let typeVal = Object.prototype.toString.call(data);
         if (typeVal === '[object Error]') {
             responseData = {
                 account: {},
                 code: 500,
                 success: false,
-                message: "Select * FROM accounts Error"
+                message: "Select account,balance FROM accounts Error"
             }
         } else {
             if (data.length === 1) {
@@ -218,7 +218,7 @@ router.get("/get_account_list", function (req, res, next) {
                 page = Math.max(page, 1);
                 OFFSETVAL = (page - 1) * LIMITVAL;
                 // *,balance/sum(balance) 
-                pgclient.query('Select * FROM transaction WHERE "from" = $1 OR "to"=$1 ORDER BY pkid DESC LIMIT $2 OFFSET $3', [queryAccount, LIMITVAL, OFFSETVAL], (data) => {
+                pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction WHERE "from" = $1 OR "to"=$1 ORDER BY pkid DESC LIMIT $2 OFFSET $3', [queryAccount, LIMITVAL, OFFSETVAL], (data) => {
                     let typeVal = Object.prototype.toString.call(data);
                     if (typeVal === '[object Error]') {
                         responseData = {
@@ -227,7 +227,7 @@ router.get("/get_account_list", function (req, res, next) {
                             count: 0,
                             code: 500,
                             success: false,
-                            message: "Select * FROM transaction Error"
+                            message: "Select exec_timestamp,level,hash,from,to,is_stable,is_fork,is_invalid,is_fail,amount FROM transaction Error"
                         }
                         res.json(responseData);
                     } else {
@@ -307,7 +307,7 @@ router.get("/get_transactions", function (req, res, next) {
                 page = Math.max(page, 1);
                 OFFSETVAL = (page - 1) * LIMITVAL;
                 // *,balance/sum(balance) 
-                pgclient.query("Select * FROM transaction ORDER BY level DESC LIMIT $1  OFFSET $2", [LIMITVAL, OFFSETVAL], (data) => {
+                pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction ORDER BY level DESC LIMIT $1  OFFSET $2', [LIMITVAL, OFFSETVAL], (data) => {
                     let typeVal = Object.prototype.toString.call(data);
                     if (typeVal === '[object Error]') {
                         responseData = {
@@ -316,7 +316,7 @@ router.get("/get_transactions", function (req, res, next) {
                             transactions: [],
                             code: 500,
                             success: false,
-                            message: "Select * FROM transaction Error"
+                            message: 'Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction Error'
                         }
                     } else {
                         responseData = {
@@ -338,14 +338,14 @@ router.get("/get_transactions", function (req, res, next) {
 
 //获取最新的交易
 router.get("/get_latest_transactions", function (req, res, next) {
-    pgclient.query("Select * FROM transaction ORDER BY level DESC LIMIT 10", (data) => {
+    pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction ORDER BY level DESC LIMIT 10', (data) => {
         let typeVal = Object.prototype.toString.call(data);
         if (typeVal === '[object Error]') {
             responseData = {
                 transactions: [],
                 code: 500,
                 success: false,
-                message: "select * from transaction error"
+                message: 'select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount from transaction error'
             }
         } else {
             responseData = {
@@ -362,7 +362,7 @@ router.get("/get_latest_transactions", function (req, res, next) {
 //获取交易号信息
 router.get("/get_transaction", function (req, res, next) {
     var queryTransaction = req.query.transaction;// ?account=2
-    pgclient.query("Select * FROM transaction  WHERE hash = $1", [queryTransaction], (data) => {
+    pgclient.query('Select pkid,hash,"from","to",amount,previous,witness_list_block,last_summary,last_summary_block,data,exec_timestamp,signature,is_free,level,witnessed_level,best_parent,is_stable,is_fork,is_invalid,is_fail,is_on_mc,mci,latest_included_mci,mc_timestamp FROM transaction  WHERE hash = $1', [queryTransaction], (data) => {
         let typeVal = Object.prototype.toString.call(data);
         if (typeVal === '[object Error]') {
             responseData = {
@@ -395,7 +395,7 @@ router.get("/get_transaction", function (req, res, next) {
                 },
                 code: 500,
                 success: false,
-                message: "select * from transaction error"
+                message: "select items from transaction error"
             }
             res.json(responseData);
         } else {
@@ -430,11 +430,11 @@ router.get("/get_transaction", function (req, res, next) {
                     },
                     code: 404,
                     success: false,
-                    message: "select * from transaction no found"
+                    message: "select items from transaction no found"
                 }
                 res.json(responseData);
             } else {
-                pgclient.query("Select * FROM parents WHERE item = $1 ORDER BY parents_id DESC", [data[0].hash], function (result) {
+                pgclient.query("Select item,parent FROM parents WHERE item = $1 ORDER BY parents_id DESC", [data[0].hash], function (result) {
                     let resultTypeVal = Object.prototype.toString.call(result);
                     if (resultTypeVal === '[object Error]') {
                         responseData = {
@@ -467,7 +467,7 @@ router.get("/get_transaction", function (req, res, next) {
                             },
                             code: 500,
                             success: false,
-                            message: "select * from parents error"
+                            message: "select items from parents error"
                         }
                     } else {
                         let transaction = data[0];
@@ -488,8 +488,6 @@ router.get("/get_transaction", function (req, res, next) {
 
 //获取以前的unit
 router.get("/get_previous_units", function (req, res, next) {
-    //Select * FROM transaction WHERE pkid < $1 ORDER BY pkid DESC limit 50
-    //Select * FROM parents WHERE item = $1 OR parent=$1 ORDER BY parents_id DESC
     var prev_pkid = Number(req.query.prev_pkid);
     var next_pkid = Number(req.query.next_pkid);
     var active_unit = req.query.active_unit;
