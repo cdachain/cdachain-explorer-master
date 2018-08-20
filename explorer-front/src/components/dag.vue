@@ -40,103 +40,116 @@
             <div id="listInfo">
                 <div class="info-item-dev">
                     <strong>Hash</strong>:
-                    <span>{{activeUnitInfo.hash}}</span>
-                </div>
-                <div class="info-item-dev">
-                    <strong>Level</strong>:
-                    <span>{{activeUnitInfo.level}}</span>
-                </div>
-                <div class="info-item-dev">
-                    <strong>From</strong>:
-                    <span>{{activeUnitInfo.from}}</span>
-                </div>
-                <div class="info-item-dev">
-                    <strong>To</strong>:
-                    <span>{{activeUnitInfo.to}}</span>
-                </div>
-                <div class="info-item-dev">
-                    <strong>Amount</strong>:
-                    <span>{{activeUnitInfo.amount | toCZRVal}}</span>
-                </div>
-                <div class="info-item-dev">
-                    <strong>Exec Time</strong>:
-                    <span>{{activeUnitInfo.exec_timestamp | toDate}}</span>
-                </div>
-                <div class="info-item-dev">
-                    <strong>Mc Time</strong>:
-                    <span>{{activeUnitInfo.mc_timestamp | toDate}}</span>
+                    <span class="info-item-val">{{activeUnitInfo.hash}}</span>
                 </div>
 
-                <div>
-                    <div class="infoTitle">Parents</div>
-                    <div class="info-item-dev" v-for="item in activeUnitInfo.parents">
+                <div class="info-item-dev">
+                    <span class="level-wrap">
+                        <strong>Level</strong>:
+                        <span class="info-item-val">{{activeUnitInfo.level}}</span>
+                    </span>
+                    <span class="level-wrap">
+                        <strong>Witnessed Level</strong>:
+                        <span class="info-item-val">{{activeUnitInfo.witnessed_level}}</span>
+                    </span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Previous</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.previous}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Best Parent</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.best_parent}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Parents</strong>:
+                    <div v-for="item in activeUnitInfo.parents">
                         <a href="javascript:;" @click="goParentHash(item.parent)">{{ item.parent }}</a>
                     </div>
                 </div>
-                <div>
-                    <div class="infoTitle">Other Info</div>
-                    <div class="otherInfo">
-                        <div class="info-item-dev">
-                            <strong>Previous</strong>:
-                            <span>{{activeUnitInfo.previous}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Witness List Block</strong>:
-                            <span>{{activeUnitInfo.witness_list_block}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Last Summary</strong>:
-                            <span>{{activeUnitInfo.last_summary}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Last Summary Block</strong>:
-                            <span>{{activeUnitInfo.last_summary_block}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Signature</strong>:
-                            <span>{{activeUnitInfo.signature}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Is Free</strong>:
-                            <span>{{activeUnitInfo.is_free}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Witnessed Level</strong>:
-                            <span>{{activeUnitInfo.witnessed_level}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Best Parent</strong>:
-                            <span>{{activeUnitInfo.best_parent}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Is Stable</strong>:
-                            <span>{{activeUnitInfo.is_stable}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Is Fork</strong>:
-                            <span>{{activeUnitInfo.is_fork}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Is Invalid</strong>:
-                            <span>{{activeUnitInfo.is_invalid}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Is Fail</strong>:
-                            <span>{{activeUnitInfo.is_fail}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Is On Mc</strong>:
-                            <span>{{activeUnitInfo.is_on_mc}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Mci</strong>:
-                            <span>{{activeUnitInfo.mci}}</span>
-                        </div>
-                        <div class="info-item-dev">
-                            <strong>Latest Included Mci</strong>:
-                            <span>{{activeUnitInfo.latest_included_mci}}</span>
-                        </div>
-                    </div>
+                <div class="dashed-line"></div>
+                <div class="info-item-dev">
+                    <span class="level-wrap">
+                        <strong>Is Stable</strong>:
+                        <span class="info-item-val">{{activeUnitInfo.is_stable}}</span>
+                    </span>
+                    <span class="level-wrap">
+                        <strong>Is On Mc</strong>:
+                        <span class="info-item-val">{{activeUnitInfo.is_on_mc}}</span>
+                    </span>
+                    <span class="level-wrap">
+                        <strong>Mci</strong>:
+                        <span class="info-item-val">{{activeUnitInfo.mci}}</span>
+                    </span>
+                    <span class="level-wrap">
+                        <strong>Status</strong>:
+                        <template v-if="activeUnitInfo.is_stable === false">
+                            <span class="txt-warning">
+                                等待确认
+                            </span>
+                        </template>
+                        <template v-else>
+                            <template v-if="activeUnitInfo.is_fork === true || activeUnitInfo.is_invalid === true">
+                                <span class="txt-info">
+                                    失败
+                                </span>
+                            </template>
+                            <template v-else>
+                                <template v-if="activeUnitInfo.is_fail === true">
+                                    <span class="txt-danger"> 失败 </span>
+                                </template>
+                                <template v-else>
+                                    <span class="txt-success">成功</span>
+                                </template>
+                            </template>
+                        </template>
+                    </span>
+
+                </div>
+                <div class="info-item-dev">
+                    <span class="level-wrap">
+                        <strong>Exec Time</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.exec_timestamp | toDate}}</span>
+                    </span>
+                    <span class="level-wrap">
+                        <strong>Mc Time</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.mc_timestamp | toDate}}</span>
+                    </span>
+                </div>
+                <div class="dashed-line"></div>
+                <div class="info-item-dev">
+                    <strong>Witness List Block</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.witness_list_block}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Last Summary Block</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.last_summary_block}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Last Summary</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.last_summary}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Is Free</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.is_free}}</span>
+                </div>
+                <div class="dashed-line"></div>
+                <div class="info-item-dev">
+                    <strong>From</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.from}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>To</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.to}}</span>
+                </div>
+                <div class="info-item-dev">
+                    <strong>Amount</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.amount | toCZRVal}}</span>
+                </div>
+                <div class="dashed-line"></div>
+                <div class="info-item-dev">
+                    <strong>Signature</strong>:
+                    <span class="info-item-val">{{activeUnitInfo.signature}}</span>
                 </div>
             </div>
         </div>
@@ -145,8 +158,8 @@
 <script>
 import $ from "jquery";
 
-import ('@/assets/js/cytoscape.min.js');
-import ('@/assets/js/dagre.min.js');
+import("@/assets/js/cytoscape.min.js");
+import("@/assets/js/dagre.min.js");
 
 var $page;
 var $inputSearch;
@@ -304,7 +317,6 @@ export default {
                 notLastUnitUp = true;
                 // console.log("self.highlightNode",self.activeUnit)
                 self.highlightNode(self.activeUnit);
-
             }
             isInit = true;
         },
@@ -386,9 +398,11 @@ export default {
                     }
                 })
                 .then(function(response) {
-                    if(response.data.units.nodes.length===0){
+                    if (response.data.units.nodes.length === 0) {
                         //TODO 回调
-                        self.$message.error("没有找到数据 : "+(searchUnit||'数据组暂无数据') );
+                        self.$message.error(
+                            "没有找到数据 : " + (searchUnit || "数据组暂无数据")
+                        );
                         self.loadingSwitch = false;
                         window.location.href = "/#/dag/";
                         return;
@@ -456,7 +470,7 @@ export default {
                     {
                         selector: "edge",
                         style: {
-                            width: 2,
+                            width: 1,
                             "target-arrow-shape": "triangle",
                             "line-color": "#5a59a0",
                             "target-arrow-color": "#5a59a0",
@@ -466,7 +480,7 @@ export default {
                     {
                         selector: ".best_parent_unit",
                         style: {
-                            width: 5,
+                            width: 3,
                             "target-arrow-shape": "triangle",
                             "line-color": "#5a59a0",
                             "target-arrow-color": "#5a59a0",
@@ -530,11 +544,11 @@ export default {
 
             //鼠标点击
             _cy.on("click", "node", function(evt) {
-                window.location.href = "/#/dag/" + evt.cyTarget.id()
+                window.location.href = "/#/dag/" + evt.cyTarget.id();
             });
 
             _cy.on("tap", "node", function(evt) {
-                window.location.href = "/#/dag/" + evt.cyTarget.id()
+                window.location.href = "/#/dag/" + evt.cyTarget.id();
             });
 
             //拖动事件
@@ -662,7 +676,7 @@ export default {
 
             var el = _cy.getElementById(unit); //获取将要高亮的DOM
 
-        //   console.log("highlightNode   _cy",el.length ,phantoms[unit] === undefined ,phantomsTop[unit] === undefined);
+            //   console.log("highlightNode   _cy",el.length ,phantoms[unit] === undefined ,phantomsTop[unit] === undefined);
             if (
                 el.length &&
                 phantoms[unit] === undefined &&
@@ -1009,7 +1023,7 @@ export default {
         goToTop: function() {
             if (notLastUnitUp) {
                 self.getStar();
-            //   console.log("返回顶部")
+                //   console.log("返回顶部")
             } else {
                 var el = _cy.getElementById(nodes[0].data.unit);
                 _cy.stop();
@@ -1430,7 +1444,7 @@ body {
 #cy {
     position: absolute;
     left: 0;
-    right: 450px;
+    right: 650px;
     top: 45px;
     bottom: 0;
     z-index: 999;
@@ -1441,7 +1455,7 @@ body {
     right: 0;
     top: 45px;
     bottom: 0;
-    width: 450px;
+    width: 650px;
     border-left: 1px solid #ccc;
     overflow: auto;
 }
@@ -1498,11 +1512,26 @@ body {
     margin-bottom: -2px;
 }
 .info-item-dev {
-    padding: 7px;
+    padding: 7px 5px;
     word-wrap: break-word;
 }
-.info-item-dev span {
+.info-item-dev a {
+    font-size: 14px;
+}
+.info-item-dev .level-wrap {
+    display: inline-block;
+    color: #1d1d1d;
+    margin-right: 20px;
+}
+.info-item-dev strong {
+    font-size: 15px;
+}
+.info-item-dev .info-item-val {
     color: #808080;
+    font-size: 14px;
+}
+.dashed-line{
+    border-bottom: 1px dashed #d6d6d6;
 }
 
 .infoTitle.hideTitle > .infoTitleImg {
@@ -1674,7 +1703,7 @@ pre {
 
 #scroll {
     position: absolute;
-    right: 451px;
+    right: 651px;
     top: 45px;
     bottom: 0;
     width: 50px;
@@ -1694,7 +1723,7 @@ pre {
     cursor: pointer;
     background-size: 28px;
     top: 68px;
-    right: 490px;
+    right: 690px;
     border: 1px solid #5a59a0;
     border-radius: 100%;
 }

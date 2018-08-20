@@ -218,7 +218,7 @@ router.get("/get_account_list", function (req, res, next) {
                 page = Math.max(page, 1);
                 OFFSETVAL = (page - 1) * LIMITVAL;
                 // *,balance/sum(balance) 
-                pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction WHERE "from" = $1 OR "to"=$1 ORDER BY pkid DESC LIMIT $2 OFFSET $3', [queryAccount, LIMITVAL, OFFSETVAL], (data) => {
+                pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction WHERE "from" = $1 OR "to"=$1 order by exec_timestamp desc, level desc,pkid desc LIMIT $2 OFFSET $3', [queryAccount, LIMITVAL, OFFSETVAL], (data) => {
                     let typeVal = Object.prototype.toString.call(data);
                     if (typeVal === '[object Error]') {
                         responseData = {
@@ -307,7 +307,7 @@ router.get("/get_transactions", function (req, res, next) {
                 page = Math.max(page, 1);
                 OFFSETVAL = (page - 1) * LIMITVAL;
                 // *,balance/sum(balance) 
-                pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction ORDER BY level DESC LIMIT $1  OFFSET $2', [LIMITVAL, OFFSETVAL], (data) => {
+                pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction order by exec_timestamp desc, level desc,pkid desc LIMIT $1  OFFSET $2', [LIMITVAL, OFFSETVAL], (data) => {
                     let typeVal = Object.prototype.toString.call(data);
                     if (typeVal === '[object Error]') {
                         responseData = {
@@ -338,7 +338,7 @@ router.get("/get_transactions", function (req, res, next) {
 
 //获取最新的交易
 router.get("/get_latest_transactions", function (req, res, next) {
-    pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction ORDER BY level DESC LIMIT 10', (data) => {
+    pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction order by exec_timestamp desc, level desc,pkid desc LIMIT 10', (data) => {
         let typeVal = Object.prototype.toString.call(data);
         if (typeVal === '[object Error]') {
             responseData = {
@@ -495,23 +495,23 @@ router.get("/get_previous_units", function (req, res, next) {
     if (next_pkid) {
         //下一个
         sqlOptions = {
-            text: "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc FROM transaction WHERE pkid < $1 ORDER BY pkid DESC limit 100",
+            text: "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc FROM transaction WHERE pkid < $1 order by exec_timestamp desc, level desc,pkid desc limit 100",
             values: [next_pkid]
         }
     } else if (prev_pkid) {
         //上一个
         sqlOptions = {
-            text: "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc FROM transaction WHERE pkid > $1 ORDER BY pkid DESC limit 100",
+            text: "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc FROM transaction WHERE pkid > $1 order by exec_timestamp desc, level desc,pkid desc limit 100",
             values: [prev_pkid]
         }
     } else if (active_unit) {
         //text: "select * from transaction where pkid > ((select pkid from transaction where hash = $1 order by pkid desc limit 1 )-49) order by pkid offset 0 limit 100 "
         sqlOptions = {
-            text: "select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc from transaction where pkid < ((select pkid from transaction where hash = $1 order by pkid desc limit 1 )+50) order by pkid  desc offset 0 limit 100 ",
+            text: "select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc from transaction where pkid < ((select pkid from transaction where hash = $1 order by pkid desc limit 1 )+50) order by exec_timestamp desc, level desc,pkid desc offset 0 limit 100 ",
             values: [active_unit]
         }
     } else {
-        sqlOptions = "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc FROM transaction ORDER BY pkid DESC limit 100"
+        sqlOptions = "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc FROM transaction order by exec_timestamp desc, level desc,pkid desc limit 100"
     }
 
     pgclient.query(sqlOptions, (data) => {

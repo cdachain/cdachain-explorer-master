@@ -11,24 +11,19 @@
                 <div class="accounts-list-wrap" v-loading="loadingSwitch">
                     <template>
                         <el-table :data="database" style="width: 100%">
-                            <el-table-column label="时间" width="180">
+                            <el-table-column label="时间" width="200">
                                 <template slot-scope="scope">
                                     <span class="table-long-item">{{scope.row.exec_timestamp | toDate}}</span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="level" width="80">
-                                <template slot-scope="scope">
-                                    <span>{{scope.row.level}}</span>
-                                </template>
-                            </el-table-column>
-                            <el-table-column label="交易号" width="180">
+                            <el-table-column label="交易号" width="200">
                                 <template slot-scope="scope">
                                     <el-button @click="goBlockPath(scope.row.hash)" type="text">
                                         <span class="table-long-item">{{scope.row.hash}}</span>
                                     </el-button>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="发款方" width="180">
+                            <el-table-column label="发款方" width="200">
                                 <template slot-scope="scope">
                                     <template v-if="scope.row.mci <= 0">
                                         <span class="table-long-item">Gene</span>
@@ -41,7 +36,7 @@
 
                                 </template>
                             </el-table-column>
-                            <el-table-column label="收款方" width="180">
+                            <el-table-column label="收款方" width="200">
                                 <template slot-scope="scope">
                                     <el-button @click="goAccountPath(scope.row.to)" type="text">
                                         <span class="table-long-item">{{scope.row.to}}</span>

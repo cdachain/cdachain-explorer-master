@@ -27,24 +27,19 @@
                     <div class="accounts-list-wrap" v-loading="loadingSwitch">
                         <template>
                             <el-table :data="tx_list" style="width: 100%">
-                                <el-table-column label="时间" width="170">
+                                <el-table-column label="时间" width="200">
                                     <template slot-scope="scope">
                                         <span class="table-long-item">{{scope.row.exec_timestamp | toDate}}</span>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="level" width="80">
-                                    <template slot-scope="scope">
-                                        <span>{{scope.row.level}}</span>
-                                    </template>
-                                </el-table-column>
-                                <el-table-column label="交易号" width="170">
+                                <el-table-column label="交易号" width="200">
                                     <template slot-scope="scope">
                                         <el-button @click="goBlockPath(scope.row.hash)" type="text">
                                             <span class="table-long-item">{{scope.row.hash}}</span>
                                         </el-button>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="发款方" width="170">
+                                <el-table-column label="发款方" width="190">
                                     <template slot-scope="scope">
                                         <template v-if="scope.row.is_from_this_account == false">
                                             <el-button @click="goAccountPath(scope.row.from)" type="text">
@@ -75,7 +70,7 @@
                                         </span>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="收款方" width="170">
+                                <el-table-column label="收款方" width="190">
                                     <template slot-scope="scope">
                                         <template v-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == false)">
                                             <el-button @click="goAccountPath(scope.row.to)" type="text">
@@ -87,7 +82,7 @@
                                         </template>
                                     </template>
                                 </el-table-column>
-                                <el-table-column label="状态" min-width="100" align="center">
+                                <el-table-column label="状态" min-width="80" align="center">
                                     <template slot-scope="scope">
                                         <template v-if="scope.row.is_stable === false">
                                             <span class="txt-warning">

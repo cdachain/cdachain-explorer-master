@@ -18,7 +18,8 @@ let tempMci;//大量数据分批存储时候，临时MCI
 let isStableDone = false;//稳定的MCI是否插入完成
 
 let stableUnitAry;//用来保存稳定tran的数组；
-let getRpcTimer = null;
+let getRpcTimer = null,
+    getUnstableTimer = null;
 
 let accountsTotal = {};
 let parentsTotal = {};
@@ -26,8 +27,8 @@ let parentsTotal = {};
 let pageUtility = {
     init() {
         let SearchOptions = {
-            text: "select mci from transaction where (is_stable = $1 and is_fork =$2 and is_invalid=$2 and is_fail=$2) order by pkid desc limit 1",
-            values: [true, false]
+            text: "select mci from transaction where (is_stable = $1) order by pkid desc limit 1",
+            values: [true]
         };
         pgclient.query(SearchOptions, (data) => {
             if (data.length === 0) {
@@ -40,7 +41,7 @@ let pageUtility = {
             }
             logger.info(`应该使用的稳定MCI-dbStableMci : ${dbStableMci}`);
             pageUtility.readyGetData();
-        });
+        }); 
     },
     readyGetData() {
         getRpcTimer = setTimeout(function () {
@@ -65,7 +66,9 @@ let pageUtility = {
                 logger.info(`dbStableMci:${dbStableMci} , rpcStableMci:${rpcStableMci}, 开始准备插入数据 ${dbStableMci < rpcStableMci}`);
                 pageUtility.startInsertData();
             } else {
-                pageUtility.readyGetData();
+                getUnstableTimer = setTimeout(function () {
+                    pageUtility.getUnstableBlocks();
+                }, 1000*7)
             }
         })
     },
@@ -291,100 +294,7 @@ let pageUtility = {
                                             getUnitByMci();
                                         } else {
                                             //最后：获取 不稳定的unstable_blocks 存储
-                                            czr.request.unstableBlocks().then(function (data) {
-                                                let unstableUnitAry = data.blocks;
-                                                let unstableBlockHashAry=[];
-                                                //排序 level 由小到大
-                                                unstableUnitAry.sort(function (a, b) {
-                                                    return Number(a.level) - Number(b.level);
-                                                });
-
-                                                //@ A处理parent
-                                                let unstableParentsTotal = {};
-                                                unstableUnitAry.forEach(blockInfo => {
-                                                    if (blockInfo.parents.length > 0) {
-                                                        // {"AAAA":["BBB","CCC"]}
-                                                        unstableParentsTotal[blockInfo.hash] = blockInfo.parents;
-                                                    }
-                                                    //DO 交易
-                                                    unstableBlockHashAry.push(blockInfo.hash);
-                                                });
-                                                let unstableParentsAllAry=[];
-                                                for (let item in unstableParentsTotal){
-                                                    unstableParentsAllAry.push(item);
-                                                }
-                                                logger.info(`本次处理不稳定Parent:${unstableParentsAllAry.length}`);
-                                                let upsertParentSql = {
-                                                    text: "select item from parents where item = ANY ($1)",
-                                                    values: [unstableParentsAllAry]
-                                                };
-                                                pgclient.query(upsertParentSql, (res) => {
-                                                    let hashParentObj = {};
-                                                    res.forEach((item) => {
-                                                        hashParentObj[item.item] = item.item;
-                                                    });
-                                                    logger.info(`合计不稳定Parents:${Object.keys(unstableParentsTotal).length}`);
-                                                    logger.info(`已存在不稳定Parents:${Object.keys(hashParentObj).length}`);
-                                                    for (let parent in hashParentObj) {
-                                                        delete unstableParentsTotal[parent];
-                                                    }
-                                                    logger.info(`处需要处理的Parents:${Object.keys(unstableParentsTotal).length}`);
-                                                    //@unstableParentsTotal 是目标数据
-                                                    // logger.info(unstableParentsTotal);
-
-                                                    // B处理Block
-                                                    let unstableUpdateBlockAry=[];//存在的账户,更新
-                                                    let unstableInsertBlockAry=[];//不存在的账户
-                                                    logger.info(`本次处理不稳定Block:${unstableBlockHashAry.length}`);
-                                                    let upsertBlockSql = {
-                                                        text: "select hash from transaction where hash = ANY ($1)",
-                                                        values: [unstableBlockHashAry]
-                                                    };
-                                                    pgclient.query(upsertBlockSql, (blockRes) => {
-                                                        logger.info(`transaction表里有的Block数量:${blockRes.length}`);
-                                                        blockRes.forEach(dbItem => {
-                                                            unstableUnitAry.forEach((unstableItem, index) => {
-                                                                if (unstableItem.hash === dbItem.hash) {
-                                                                    unstableUpdateBlockAry.push(unstableItem);
-                                                                    unstableUnitAry.splice(index, 1);
-                                                                }
-                                                            })
-                                                        });
-                                                        unstableInsertBlockAry = [].concat(unstableUnitAry);
-                                                        logger.info(`更新不稳定Block数量:${unstableUpdateBlockAry.length}`);
-                                                        // logger.info(unstableUpdateBlockAry);
-                                                        logger.info(`插入不稳定Block数量:${unstableInsertBlockAry.length}`);
-                                                        // logger.info(unstableInsertBlockAry);
-
-                                                        pgclient.query('BEGIN', (err) => {
-                                                            logger.info("批量操作不稳定 Unit Start", err);
-                                                            if(pageUtility.shouldAbort(res,"操作不稳定BlockStart")){
-                                                                return;
-                                                            }
-                                                            /*
-                                                            * 批量插入 Parent、   unstableParentsTotal:object
-                                                            * 批量插入 Block、    unstableInsertBlockAry
-                                                            * 批量更新 Block、    unstableUpdateBlockAry
-                                                            * */
-                                                            if(Object.keys(unstableParentsTotal).length>0){
-                                                                pageUtility.batchInsertParent(unstableParentsTotal);
-                                                            }
-
-                                                            if(unstableInsertBlockAry.length>0){
-                                                                pageUtility.batchInsertBlock(unstableInsertBlockAry);
-                                                            }
-                                                            if(unstableUpdateBlockAry.length>0){
-                                                                pageUtility.batchUpdateBlock(unstableUpdateBlockAry);
-                                                            }
-                                                            pgclient.query('COMMIT', (err) => {
-                                                                logger.info("批量操作不稳定 Unit End", err);
-                                                                pageUtility.readyGetData();
-                                                            })
-                                                        })
-
-                                                    });
-                                                });
-                                            })
+                                            pageUtility.getUnstableBlocks();
                                         }
                                     })
                                 });
@@ -398,6 +308,102 @@ let pageUtility = {
             })
         };
         getUnitByMci();
+    },
+    getUnstableBlocks(){
+        czr.request.unstableBlocks().then(function (data) {
+            let unstableUnitAry = data.blocks;
+            let unstableBlockHashAry=[];
+            //排序 level 由小到大
+            unstableUnitAry.sort(function (a, b) {
+                return Number(a.level) - Number(b.level);
+            });
+
+            //@ A处理parent
+            let unstableParentsTotal = {};
+            unstableUnitAry.forEach(blockInfo => {
+                if (blockInfo.parents.length > 0) {
+                    // {"AAAA":["BBB","CCC"]}
+                    unstableParentsTotal[blockInfo.hash] = blockInfo.parents;
+                }
+                //DO 交易
+                unstableBlockHashAry.push(blockInfo.hash);
+            });
+            let unstableParentsAllAry=[];
+            for (let item in unstableParentsTotal){
+                unstableParentsAllAry.push(item);
+            }
+            logger.info(`本次处理不稳定Parent:${unstableParentsAllAry.length}`);
+            let upsertParentSql = {
+                text: "select item from parents where item = ANY ($1)",
+                values: [unstableParentsAllAry]
+            };
+            pgclient.query(upsertParentSql, (res) => {
+                let hashParentObj = {};
+                res.forEach((item) => {
+                    hashParentObj[item.item] = item.item;
+                });
+                logger.info(`合计不稳定Parents:${Object.keys(unstableParentsTotal).length}`);
+                logger.info(`已存在不稳定Parents:${Object.keys(hashParentObj).length}`);
+                for (let parent in hashParentObj) {
+                    delete unstableParentsTotal[parent];
+                }
+                logger.info(`处需要处理的Parents:${Object.keys(unstableParentsTotal).length}`);
+                //@unstableParentsTotal 是目标数据
+                // logger.info(unstableParentsTotal);
+
+                // B处理Block
+                let unstableUpdateBlockAry=[];//存在的账户,更新
+                let unstableInsertBlockAry=[];//不存在的账户
+                logger.info(`本次处理不稳定Block:${unstableBlockHashAry.length}`);
+                let upsertBlockSql = {
+                    text: "select hash from transaction where hash = ANY ($1)",
+                    values: [unstableBlockHashAry]
+                };
+                pgclient.query(upsertBlockSql, (blockRes) => {
+                    logger.info(`transaction表里有的Block数量:${blockRes.length}`);
+                    blockRes.forEach(dbItem => {
+                        unstableUnitAry.forEach((unstableItem, index) => {
+                            if (unstableItem.hash === dbItem.hash) {
+                                unstableUpdateBlockAry.push(unstableItem);
+                                unstableUnitAry.splice(index, 1);
+                            }
+                        })
+                    });
+                    unstableInsertBlockAry = [].concat(unstableUnitAry);
+                    logger.info(`更新不稳定Block数量:${unstableUpdateBlockAry.length}`);
+                    // logger.info(unstableUpdateBlockAry);
+                    logger.info(`插入不稳定Block数量:${unstableInsertBlockAry.length}`);
+                    // logger.info(unstableInsertBlockAry);
+
+                    pgclient.query('BEGIN', (err) => {
+                        logger.info("批量操作不稳定 Unit Start", err);
+                        if(pageUtility.shouldAbort(res,"操作不稳定BlockStart")){
+                            return;
+                        }
+                        /*
+                        * 批量插入 Parent、   unstableParentsTotal:object
+                        * 批量插入 Block、    unstableInsertBlockAry
+                        * 批量更新 Block、    unstableUpdateBlockAry
+                        * */
+                        if(Object.keys(unstableParentsTotal).length>0){
+                            pageUtility.batchInsertParent(unstableParentsTotal);
+                        }
+
+                        if(unstableInsertBlockAry.length>0){
+                            pageUtility.batchInsertBlock(unstableInsertBlockAry);
+                        }
+                        if(unstableUpdateBlockAry.length>0){
+                            pageUtility.batchUpdateBlock(unstableUpdateBlockAry);
+                        }
+                        pgclient.query('COMMIT', (err) => {
+                            logger.info("批量操作不稳定 Unit End", err);
+                            pageUtility.readyGetData();
+                        })
+                    })
+
+                });
+            });
+        })
     },
 
     //批量插入Parent
@@ -468,7 +474,7 @@ let pageUtility = {
                 item.last_summary+"','"+
                 item.last_summary_block+"','"+
                 item.data+"',"+
-                Number(item.exec_timestamp)+",'"+
+                (Number(item.exec_timestamp)||0)+",'"+
                 item.signature+"',"+
                 (item.is_free==='1')+",'"+
                 item.level+"','"+
@@ -479,11 +485,25 @@ let pageUtility = {
                 (item.is_invalid==='1')+","+
                 (item.is_fail==='1')+","+
                 (item.is_on_mc==='1')+","+
-                Number(item.mci)+","+
-                (Number(item.latest_included_mci)||0)+","+
-                Number(item.mc_timestamp)+
+                (Number(item.mci)||0)+","+//item.mci可能为null
+                (Number(item.latest_included_mci)||0)+","+//latest_included_mci 可能为0 =>12303
+                (Number(item.mc_timestamp)||0)+
                 ")");
+
+            if(!Number(item.exec_timestamp)){
+                logger.error("exec_timestamp 错了",item.mci,item.hash,item.latest_included_mci)
+            }
+            if(!Number(item.mci)){
+                logger.error("mci 错了",item.mci,item.hash,item.mci)
+            }
+            if(!Number(item.latest_included_mci)){
+                logger.error("latest_included_mci 错了",item.mci,item.hash,item.latest_included_mci)
+            }
+            if(!Number(item.mc_timestamp)){
+                logger.error("mc_timestamp 错了",item.mci,item.hash,item.mc_timestamp)
+            }
         });
+
         let batchInsertSql = {
             text: 'INSERT INTO transaction(hash,"from","to",amount,previous,witness_list_block,last_summary,last_summary_block,data,exec_timestamp,signature,is_free,level,witnessed_level,best_parent,is_stable,is_fork,is_invalid,is_fail,is_on_mc,mci,latest_included_mci,mc_timestamp) VALUES'+tempAry.toString()
         };

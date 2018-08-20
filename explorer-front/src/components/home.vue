@@ -9,24 +9,19 @@
                 <h2 class="home-content-tit">最新交易</h2>
                 <template>
                     <el-table :data="database" style="width: 100%" v-loading="loadingSwitch">
-                        <el-table-column label="时间" width="170">
+                        <el-table-column label="时间" width="200">
                             <template slot-scope="scope">
                                 <span class="table-long-item">{{scope.row.exec_timestamp | toDate}}</span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="level" width="80">
-                            <template slot-scope="scope">
-                                <span>{{scope.row.level}}</span>
-                            </template>
-                        </el-table-column>
-                        <el-table-column label="交易号" width="170">
+                        <el-table-column label="交易号" width="200">
                             <template slot-scope="scope">
                                 <el-button @click="goBlockPath(scope.row.hash)" type="text">
                                     <span class="table-long-item">{{scope.row.hash}}</span>
                                 </el-button>
                             </template>
                         </el-table-column>
-                        <el-table-column label="发款方" width="170">
+                        <el-table-column label="发款方" width="200">
                             <template slot-scope="scope">
                                 <template v-if="scope.row.mci <= 0">
                                     <span class="table-long-item">Gene</span>
@@ -39,7 +34,7 @@
 
                             </template>
                         </el-table-column>
-                        <el-table-column label="收款方" width="170">
+                        <el-table-column label="收款方" width="200">
                             <template slot-scope="scope">
                                 <el-button @click="goAccountPath(scope.row.to)" type="text">
                                     <span class="table-long-item">{{scope.row.to}}</span>
@@ -74,7 +69,7 @@
                                 </span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="金额 / CZR" align="right" min-width="220">
+                        <el-table-column label="金额 / CZR" align="right" width="120">
                             <template slot-scope="scope">
                                 <span class="table-long-item">{{scope.row.amount | toCZRVal}}</span>
                             </template>
