@@ -77,7 +77,12 @@
                     </span>
                 </div>
                 <div class="info-item-dev">
-                    <strong :class="['switch',{'switch-show': showParentsLink }]" @click="toggleParents">Parents</strong>
+                    <template v-if='activeUnitInfo.parents.length==0'>
+                        <strong>Parents : - </strong>
+                    </template>
+                    <template v-else>
+                        <strong :class="['switch',{'switch-show': showParentsLink }]" @click="toggleParents('parent')">Parents</strong>
+                    </template>
                     <div v-for="item in activeUnitInfo.parents" v-show="showParentsLink==true">
                         <router-link tag="a" :to="'/dag/'+item.parent" target="_blank">{{ item.parent }}</router-link>
                     </div>
@@ -133,9 +138,21 @@
                 </div>
                 <div class="dashed-line"></div>
                 <div class="info-item-dev">
-                    <strong>Witness List Block</strong>:
+                    <template v-if='activeUnitInfo.witness_list_block === "0000000000000000000000000000000000000000000000000000000000000000"'>
+                        <strong  :class="['switch',{'switch-show': showWitnessLink }]"  @click="toggleParents('witness')">Witness List Block</strong>
+                    </template>
+                    <template v-else>
+                        <strong >Witness List Block</strong>
+                    </template>
                     <span class="info-item-val">
-                        <router-link tag="a" :to="'/dag/'+activeUnitInfo.witness_list_block" target="_blank">{{activeUnitInfo.witness_list_block}}</router-link>
+                        <template v-if='activeUnitInfo.witness_list_block === "0000000000000000000000000000000000000000000000000000000000000000"'>
+                            <div v-for="item in activeUnitInfo.witness_list" v-show="showWitnessLink==true">
+                                <router-link tag="a" :to="'/account/'+item" target="_blank">{{ item }}</router-link>
+                            </div>
+                        </template>
+                        <template v-else>
+                            <router-link tag="a" :to="'/dag/'+activeUnitInfo.witness_list_block" target="_blank">{{activeUnitInfo.witness_list_block}}</router-link>
+                        </template>
                     </span>
                 </div>
                 <div class="info-item-dev">
@@ -259,6 +276,7 @@ export default {
             loadingInfoSwitch: false,
             activeUnit: "",
             showParentsLink:true,
+            showWitnessLink:true,
             activeUnitInfo: {
                 pkid: "-",
                 hash: "-",
@@ -1351,8 +1369,13 @@ export default {
             }
             $inputSearch.val("");
         },
-        toggleParents:function(){
-            self.showParentsLink =  !self.showParentsLink;
+        toggleParents:function(showLink){
+            if(showLink=='parent'){
+                self.showParentsLink =  !self.showParentsLink;
+            }else if(showLink=='witness'){
+                self.showWitnessLink =  !self.showWitnessLink;
+            }
+            
         }
         //
         // goParentHash(hash) {

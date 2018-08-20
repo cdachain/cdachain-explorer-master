@@ -440,7 +440,8 @@ router.get("/get_transaction", function (req, res, next) {
                 }
                 res.json(responseData);
             } else {
-                pgclient.query("Select item,parent FROM parents WHERE item = $1 ORDER BY parents_id DESC", [data[0].hash], function (result) {
+                let currentHash=data[0].hash;
+                pgclient.query("Select item,parent FROM parents WHERE item = $1 ORDER BY parents_id DESC", [currentHash], function (result) {
                     let resultTypeVal = Object.prototype.toString.call(result);
                     if (resultTypeVal === '[object Error]') {
                         responseData = {
@@ -475,17 +476,38 @@ router.get("/get_transaction", function (req, res, next) {
                             success: false,
                             message: "select items from parents error"
                         }
+                        res.json(responseData);
                     } else {
                         let transaction = data[0];
                         transaction.parents = result;
-                        responseData = {
-                            transaction: transaction,
-                            code: 200,
-                            success: true,
-                            message: "success"
+                        transaction.witness_list = [];
+                        
+                        //witness_list_block
+                        if(transaction.witness_list_block!=='0000000000000000000000000000000000000000000000000000000000000000'){
+                            responseData = {
+                                transaction: transaction,
+                                code: 200,
+                                success: true,
+                                message: "success"
+                            }
+                            res.json(responseData);
+                        }else{
+                            pgclient.query("Select item,account FROM witness WHERE item = $1 ORDER BY witness_id DESC", [currentHash], function (witnessResult) {
+                                let witnessAry=[];
+                                witnessResult.forEach(currentItem=>{
+                                    witnessAry.push(currentItem.account);
+                                })
+                                transaction.witness_list = witnessAry;
+                                responseData = {
+                                    transaction: transaction,
+                                    code: 200,
+                                    success: true,
+                                    message: "success"
+                                }
+                                res.json(responseData);
+                            });
                         }
                     }
-                    res.json(responseData);
                 });
             }
         }
@@ -542,7 +564,7 @@ router.get("/get_previous_units", function (req, res, next) {
             })
             var dataAryStr = dataAry.join(",");
 
-            pgclient.query("Select item,parent FROM parents WHERE item in (" + dataAryStr + ")" + "or parent in(" + dataAryStr + ")", (result) => {
+            pgclient.query("Select item,parent FROM parents WHERE item in (" + dataAryStr + ")" + " or parent in(" + dataAryStr + ")", (result) => {
 
                 let resultTypeVal = Object.prototype.toString.call(result);
                 if (resultTypeVal === '[object Error]') {
@@ -565,6 +587,7 @@ router.get("/get_previous_units", function (req, res, next) {
                             },
                             "best_parent_unit": true
                         }
+                        
                     })
                     responseData = {
                         units: {
