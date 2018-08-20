@@ -560,7 +560,6 @@ router.get("/get_previous_units", function (req, res, next) {
         } else {
             
             if(data.length===0){
-                console.log(data);
                 responseData = {
                     units: {
                         nodes: [],
