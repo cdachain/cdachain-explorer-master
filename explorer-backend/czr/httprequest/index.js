@@ -1,10 +1,10 @@
 "use strict";
-var rpc = require('node-json-rpc');
+var rpc = require('../json-rpc/index');
 
 var options = {
     // host: '192.168.10.232',
-    // host: '192.168.10.153',
-    host: "127.0.0.1",
+    host: '192.168.10.153',
+    // host: "127.0.0.1",
     port: 8765,
 };
 
@@ -17,7 +17,6 @@ var HttpRequest = function (host, timeout, apiVersion) {
 
 
 var client = new rpc.Client(options);
-
 function asyncfunc(opt) {
     return new Promise((resolve, reject) => {
         client.call(opt,
