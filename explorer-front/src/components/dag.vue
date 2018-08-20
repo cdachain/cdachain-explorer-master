@@ -56,13 +56,24 @@
                 <div class="info-item-dev">
                     <strong >Previous</strong>:
                     <span class="info-item-val">
-                        <router-link tag="a" :to="'/dag/'+activeUnitInfo.previous" target="_blank">{{activeUnitInfo.previous}}</router-link>
+                        <template v-if='activeUnitInfo.previous === "0000000000000000000000000000000000000000000000000000000000000000"'>
+                            <span>-</span>
+                        </template>
+                        <template v-else>
+                            <router-link tag="a" :to="'/dag/'+activeUnitInfo.previous" target="_blank">{{activeUnitInfo.previous}}</router-link>
+                        </template>
                     </span>
                 </div>
                 <div class="info-item-dev">
                     <strong>Best Parent</strong>:
                     <span class="info-item-val">
-                        <router-link tag="a" :to="'/dag/'+activeUnitInfo.best_parent" target="_blank">{{activeUnitInfo.best_parent}}</router-link>
+                        <template v-if='activeUnitInfo.best_parent === "0000000000000000000000000000000000000000000000000000000000000000"'>
+                            <span>-</span>
+                        </template>
+                        <template v-else>
+                            <router-link tag="a" :to="'/dag/'+activeUnitInfo.best_parent" target="_blank">{{activeUnitInfo.best_parent}}
+                            </router-link>
+                        </template>
                     </span>
                 </div>
                 <div class="info-item-dev">
@@ -130,12 +141,24 @@
                 <div class="info-item-dev">
                     <strong>Last Summary Block</strong>:
                     <span class="info-item-val">
-                        <router-link tag="a" :to="'/dag/'+activeUnitInfo.last_summary_block" target="_blank">{{activeUnitInfo.last_summary_block}}</router-link>
+                        <template v-if='activeUnitInfo.last_summary_block === "0000000000000000000000000000000000000000000000000000000000000000"'>
+                            <span>-</span>
+                        </template>
+                        <template v-else>
+                            <router-link tag="a" :to="'/dag/'+activeUnitInfo.last_summary_block" target="_blank">{{activeUnitInfo.last_summary_block}}</router-link>
+                        </template>
                     </span>
                 </div>
                 <div class="info-item-dev">
                     <strong>Last Summary</strong>:
-                    <span class="info-item-val">{{activeUnitInfo.last_summary}}</span>
+                    <span class="info-item-val">
+                        <template v-if='activeUnitInfo.last_summary === "0000000000000000000000000000000000000000000000000000000000000000"'>
+                            <span>-</span>
+                        </template>
+                        <template v-else>
+                            {{activeUnitInfo.last_summary}}
+                        </template>
+                    </span>
                 </div>
                 <div class="info-item-dev">
                     <strong>Is Free</strong>:

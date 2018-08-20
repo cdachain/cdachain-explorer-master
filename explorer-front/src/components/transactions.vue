@@ -43,7 +43,7 @@
                                     </el-button>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="状态" min-width="100" align="center">
+                            <el-table-column label="状态" min-width="80" align="center">
                                 <template slot-scope="scope">
                                     <template v-if="scope.row.is_stable === false">
                                         <span class="txt-warning">
@@ -71,9 +71,9 @@
                                     </span>
                                 </template>
                             </el-table-column>
-                            <el-table-column label="金额 / CZR" align="right" min-width="200">
+                            <el-table-column label="金额 / CZR" align="right" min-width="230">
                                 <template slot-scope="scope">
-                                    <span class="table-long-item">{{scope.row.amount | toCZRVal}}</span>
+                                    <span >{{scope.row.amount | toCZRVal}}</span>
                                 </template>
                             </el-table-column>
 
@@ -124,11 +124,16 @@ export default {
     },
     methods: {
         getTransactions() {
+            var wtVal='';
+            if(window.location.hash.indexOf('?wt=')>1){
+                wtVal='all'
+            }
             (self.loadingSwitch = true),
                 self.$axios
                     .get("/api/get_transactions", {
                         params: {
-                            page: self.currentPage
+                            page: self.currentPage,
+                            wt: wtVal,
                         }
                     })
                     .then(function(response) {

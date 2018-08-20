@@ -41,7 +41,7 @@
                                 </el-button>
                             </template>
                         </el-table-column>
-                        <el-table-column label="状态" min-width="100" align="center">
+                        <el-table-column label="状态" min-width="80" align="center">
                             <template slot-scope="scope">
                                 <template v-if="scope.row.is_stable === false">
                                     <span class="txt-warning">
@@ -69,12 +69,11 @@
                                 </span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="金额 / CZR" align="right" width="120">
+                        <el-table-column label="金额 / CZR" align="right" width="240">
                             <template slot-scope="scope">
-                                <span class="table-long-item">{{scope.row.amount | toCZRVal}}</span>
+                                <span >{{scope.row.amount | toCZRVal}}</span>
                             </template>
                         </el-table-column>
-
                     </el-table>
                 </template>
             </div>

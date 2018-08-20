@@ -264,6 +264,11 @@ router.get("/get_account_list", function (req, res, next) {
 //获取交易列表 TODO 切换查询，避免攻击
 router.get("/get_transactions", function (req, res, next) {
     var queryPage = req.query.page;// ?page=2
+    var wt = req.query.wt;// ?page=2
+    var filterVal = '';
+    if(!wt){
+        filterVal=' WHERE "from" != "to" or is_stable = true or amount != 0 '
+    }
     var page, //当前页数
         pages, // 合计总页数
         count; //总条数
@@ -275,7 +280,8 @@ router.get("/get_transactions", function (req, res, next) {
     } else {
         page = Number(queryPage) || 1;
     }
-    pgclient.query("Select COUNT(1) FROM transaction", (count) => {
+    //
+    pgclient.query('Select COUNT(1) FROM transaction '+filterVal, (count) => {
         let typeCountVal = Object.prototype.toString.call(count);
         if (typeCountVal === '[object Error]') {
             responseData = {
@@ -307,7 +313,7 @@ router.get("/get_transactions", function (req, res, next) {
                 page = Math.max(page, 1);
                 OFFSETVAL = (page - 1) * LIMITVAL;
                 // *,balance/sum(balance) 
-                pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction order by exec_timestamp desc, level desc,pkid desc LIMIT $1  OFFSET $2', [LIMITVAL, OFFSETVAL], (data) => {
+                pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction '+ filterVal +' order by exec_timestamp desc, level desc,pkid desc LIMIT $1  OFFSET $2', [LIMITVAL, OFFSETVAL], (data) => {
                     let typeVal = Object.prototype.toString.call(data);
                     if (typeVal === '[object Error]') {
                         responseData = {
@@ -338,7 +344,7 @@ router.get("/get_transactions", function (req, res, next) {
 
 //获取最新的交易
 router.get("/get_latest_transactions", function (req, res, next) {
-    pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction order by exec_timestamp desc, level desc,pkid desc LIMIT 10', (data) => {
+    pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction where "from" != "to" or is_stable = true or amount != 0 order by exec_timestamp desc, level desc,pkid desc LIMIT 10', (data) => {
         let typeVal = Object.prototype.toString.call(data);
         if (typeVal === '[object Error]') {
             responseData = {
