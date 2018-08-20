@@ -609,7 +609,6 @@ export default {
             _cy.on("pan", function(e) {
                 var ext = _cy.extent();
                 if (nextPositionUpdates < ext.y2) {
-                    self.loadingSwitch = true;
                     self.getNext();
                 } else if (
                     notLastUnitUp === true &&
@@ -960,7 +959,9 @@ export default {
             }
         },
         getNext: function() {
+            console.log("getNext",!bWaitingForNext , isInit)
             if (!bWaitingForNext && isInit) {
+                self.loadingSwitch = true;
                 bWaitingForNext = true;
                 self.$axios
                     .get("/api/get_previous_units", {
@@ -969,6 +970,7 @@ export default {
                         }
                     })
                     .then(function(response) {
+                        console.log("getNext",response)
                         self.loadingSwitch = false;
                         var responseData = response.data.units;
 
@@ -1106,7 +1108,7 @@ export default {
             $listInfo.hide();
         },
 
-        //更新不稳定 Unit 列表
+        //更新不稳定 列表
         setChangesStableUnits: function(arrStableUnits) {
             if (!arrStableUnits) return;
             var node;
@@ -1365,7 +1367,7 @@ export default {
             if (text.length == 64) {
                 location.hash = "#/dag/" + text;
             } else {
-                this.$message.error("请输入正确格式的Unit");
+                this.$message.error("请输入正确格式的Block");
             }
             $inputSearch.val("");
         },

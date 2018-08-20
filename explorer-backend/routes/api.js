@@ -558,48 +558,62 @@ router.get("/get_previous_units", function (req, res, next) {
             }
             res.json(responseData);
         } else {
-            let dataAry = [];
-            data.forEach(item => {
-                dataAry.push("'" + item.hash + "'");
-            })
-            var dataAryStr = dataAry.join(",");
-
-            pgclient.query("Select item,parent FROM parents WHERE item in (" + dataAryStr + ")" + " or parent in(" + dataAryStr + ")", (result) => {
-
-                let resultTypeVal = Object.prototype.toString.call(result);
-                if (resultTypeVal === '[object Error]') {
-                    responseData = {
-                        units: {
-                            nodes: [],
-                            edges: {}
-                        },
-                        code: 500,
-                        success: false,
-                        message: "Select item,parent FROM parents error"
-                    }
-                    res.json(responseData);
-                }else{
-                    result.forEach(resItem => {
-                        tempEdges[resItem.item + '_' + resItem.parent] = {
-                            "data": {
-                                "source": resItem.item,
-                                "target": resItem.parent
-                            },
-                            "best_parent_unit": true
-                        }
-                        
-                    })
-                    responseData = {
-                        units: {
-                            nodes: formatUnits(data),
-                            edges: tempEdges
-                        },
-                        code: 200,
-                        message: "success"
-                    };
-                    res.json(responseData);
+            
+            if(data.length===0){
+                console.log(data);
+                responseData = {
+                    units: {
+                        nodes: [],
+                        edges: {}
+                    },
+                    code: 200,
+                    success: false,
+                    message: "blocks is null"
                 }
-            })
+                res.json(responseData);
+            }else{
+                let dataAry = [];
+                data.forEach(item => {
+                    dataAry.push("'" + item.hash + "'");
+                })
+                var dataAryStr = dataAry.join(",");
+    
+                pgclient.query("Select item,parent FROM parents WHERE item in (" + dataAryStr + ")" + " or parent in(" + dataAryStr + ")", (result) => {
+                    let resultTypeVal = Object.prototype.toString.call(result);
+                    if (resultTypeVal === '[object Error]') {
+                        responseData = {
+                            units: {
+                                nodes: [],
+                                edges: {}
+                            },
+                            code: 500,
+                            success: false,
+                            message: "Select item,parent FROM parents error"
+                        }
+                        res.json(responseData);
+                    }else{
+                        result.forEach(resItem => {
+                            tempEdges[resItem.item + '_' + resItem.parent] = {
+                                "data": {
+                                    "source": resItem.item,
+                                    "target": resItem.parent
+                                },
+                                "best_parent_unit": true
+                            }
+                            
+                        })
+                        responseData = {
+                            units: {
+                                nodes: formatUnits(data),
+                                edges: tempEdges
+                            },
+                            code: 200,
+                            message: "success"
+                        };
+                        res.json(responseData);
+                    }
+                })
+            }
         }
     });
 });
