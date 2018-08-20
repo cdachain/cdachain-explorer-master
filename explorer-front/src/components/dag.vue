@@ -54,17 +54,21 @@
                     </span>
                 </div>
                 <div class="info-item-dev">
-                    <strong>Previous</strong>:
-                    <span class="info-item-val">{{activeUnitInfo.previous}}</span>
+                    <strong >Previous</strong>:
+                    <span class="info-item-val">
+                        <router-link tag="a" :to="'/dag/'+activeUnitInfo.previous" target="_blank">{{activeUnitInfo.previous}}</router-link>
+                    </span>
                 </div>
                 <div class="info-item-dev">
                     <strong>Best Parent</strong>:
-                    <span class="info-item-val">{{activeUnitInfo.best_parent}}</span>
+                    <span class="info-item-val">
+                        <router-link tag="a" :to="'/dag/'+activeUnitInfo.best_parent" target="_blank">{{activeUnitInfo.best_parent}}</router-link>
+                    </span>
                 </div>
                 <div class="info-item-dev">
-                    <strong>Parents</strong>:
-                    <div v-for="item in activeUnitInfo.parents">
-                        <a href="javascript:;" @click="goParentHash(item.parent)">{{ item.parent }}</a>
+                    <strong :class="['switch',{'switch-show': showParentsLink }]" @click="toggleParents">Parents</strong>
+                    <div v-for="item in activeUnitInfo.parents" v-show="showParentsLink==true">
+                        <router-link tag="a" :to="'/dag/'+item.parent" target="_blank">{{ item.parent }}</router-link>
                     </div>
                 </div>
                 <div class="dashed-line"></div>
@@ -119,11 +123,15 @@
                 <div class="dashed-line"></div>
                 <div class="info-item-dev">
                     <strong>Witness List Block</strong>:
-                    <span class="info-item-val">{{activeUnitInfo.witness_list_block}}</span>
+                    <span class="info-item-val">
+                        <router-link tag="a" :to="'/dag/'+activeUnitInfo.witness_list_block" target="_blank">{{activeUnitInfo.witness_list_block}}</router-link>
+                    </span>
                 </div>
                 <div class="info-item-dev">
                     <strong>Last Summary Block</strong>:
-                    <span class="info-item-val">{{activeUnitInfo.last_summary_block}}</span>
+                    <span class="info-item-val">
+                        <router-link tag="a" :to="'/dag/'+activeUnitInfo.last_summary_block" target="_blank">{{activeUnitInfo.last_summary_block}}</router-link>
+                    </span>
                 </div>
                 <div class="info-item-dev">
                     <strong>Last Summary</strong>:
@@ -136,11 +144,15 @@
                 <div class="dashed-line"></div>
                 <div class="info-item-dev">
                     <strong>From</strong>:
-                    <span class="info-item-val">{{activeUnitInfo.from}}</span>
+                    <span class="info-item-val">
+                         <router-link tag="a" :to="'/account/'+activeUnitInfo.from" target="_blank">{{activeUnitInfo.from}}</router-link>
+                    </span>
                 </div>
                 <div class="info-item-dev">
                     <strong>To</strong>:
-                    <span class="info-item-val">{{activeUnitInfo.to}}</span>
+                    <span class="info-item-val">
+                         <router-link tag="a" :to="'/account/'+activeUnitInfo.to" target="_blank">{{activeUnitInfo.to}}</router-link>
+                    </span>
                 </div>
                 <div class="info-item-dev">
                     <strong>Amount</strong>:
@@ -223,6 +235,7 @@ export default {
             loadingSwitch: true,
             loadingInfoSwitch: false,
             activeUnit: "",
+            showParentsLink:true,
             activeUnitInfo: {
                 pkid: "-",
                 hash: "-",
@@ -1315,11 +1328,14 @@ export default {
             }
             $inputSearch.val("");
         },
-        //
-        goParentHash(hash) {
-            self.loadingInfoSwitch = true;
-            location.hash = "#/dag/" + hash;
+        toggleParents:function(){
+            self.showParentsLink =  !self.showParentsLink;
         }
+        //
+        // goParentHash(hash) {
+        //     self.loadingInfoSwitch = true;
+        //     location.hash = "#/dag/" + hash;
+        // }
     },
     filters: {
         toCZRVal: function(val) {
@@ -1829,5 +1845,24 @@ pre {
     #menuInput input[type="text"] {
         width: 81%;
     }
+}
+
+.switch{cursor: pointer;padding: 10px 10px 10px 0;-webkit-user-select: none;position: relative}
+.switch:after{
+    position: absolute;
+    content: "";
+    top: 14px;
+    right: -30px;
+    border-top: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 6px solid #868686;
+}
+.switch-show:after{
+    top: 16px;
+    border-top: 6px solid #363636;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 6px solid transparent;
 }
 </style>

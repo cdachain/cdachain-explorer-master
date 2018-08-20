@@ -158,6 +158,7 @@ var Client = function (options) {
 
     request.on('error', function (error) {
       //TODO Proccess Request Error
+      console.error(error);
       logger.error(error);
       timer = setTimeout(function(){
         self.call(data, callback, opts);

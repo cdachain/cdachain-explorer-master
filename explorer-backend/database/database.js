@@ -544,10 +544,11 @@ let pageUtility = {
                 (item.is_invalid==='1')+","+
                 (item.is_fail==='1')+","+
                 (item.is_on_mc==='1')+
+                (item.mc_timestamp)+
                 ")");
         });
-        let batchUpdateSql="update transaction set is_free=tmp.is_free , is_stable=tmp.is_stable , is_fork=tmp.is_fork , is_invalid=tmp.is_invalid , is_fail=tmp.is_fail , is_on_mc=tmp.is_on_mc from (values " + tempAry.toString() +
-            ") as tmp (hash,is_free,is_stable,is_fork,is_invalid,is_fail,is_on_mc) where transaction.hash=tmp.hash";
+        let batchUpdateSql="update transaction set is_free=tmp.is_free , is_stable=tmp.is_stable , is_fork=tmp.is_fork , is_invalid=tmp.is_invalid , is_fail=tmp.is_fail , is_on_mc=tmp.is_on_mc , mc_timestamp=tmp.mc_timestamp from (values " + tempAry.toString() +
+            ") as tmp (hash,is_free,is_stable,is_fork,is_invalid,is_fail,is_on_mc.mc_timestamp) where transaction.hash=tmp.hash";
         pgclient.query(batchUpdateSql, (res) => {
             //ROLLBACK
             if(pageUtility.shouldAbort(res,"batchUpdateBlock")){
