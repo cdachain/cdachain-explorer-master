@@ -218,7 +218,7 @@ router.get("/get_account_list", function (req, res, next) {
                 page = Math.max(page, 1);
                 OFFSETVAL = (page - 1) * LIMITVAL;
                 // *,balance/sum(balance) 
-                pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount FROM transaction WHERE "from" = $1 OR "to"=$1 order by exec_timestamp desc, level desc,pkid desc LIMIT $2 OFFSET $3', [queryAccount, LIMITVAL, OFFSETVAL], (data) => {
+                pgclient.query('Select exec_timestamp,level,hash,"from","to",is_stable,is_fork,is_invalid,is_fail,amount,mci FROM transaction WHERE "from" = $1 OR "to"=$1 order by exec_timestamp desc, level desc,pkid desc LIMIT $2 OFFSET $3', [queryAccount, LIMITVAL, OFFSETVAL], (data) => {
                     let typeVal = Object.prototype.toString.call(data);
                     if (typeVal === '[object Error]') {
                         responseData = {
@@ -227,7 +227,7 @@ router.get("/get_account_list", function (req, res, next) {
                             count: 0,
                             code: 500,
                             success: false,
-                            message: "Select exec_timestamp,level,hash,from,to,is_stable,is_fork,is_invalid,is_fail,amount FROM transaction Error"
+                            message: "Select exec_timestamp,level,hash,from,to,is_stable,is_fork,is_invalid,is_fail,amount,mci FROM transaction Error"
                         }
                         res.json(responseData);
                     } else {

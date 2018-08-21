@@ -59,13 +59,18 @@
                                 <el-table-column>
                                     <template slot-scope="scope">
                                         <span>
-                                            <el-button v-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == false)" type="warning" size="mini">转出</el-button>
+                                            <el-button v-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == false)" type="warning" size="mini">
+                                                转出
+                                            </el-button>
+
                                             <el-button v-else-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == true)&&(scope.row.mci > 0)" size="mini">
                                                 <i class="el-icon-sort trans-to-self"></i>
                                             </el-button>
+
                                             <el-button v-else-if="(scope.row.is_from_this_account == true)&&(scope.row.is_to_self == true)&&(scope.row.mci <= 0)" type="success" size="mini">
                                                 转入
                                             </el-button>
+                                            
                                             <el-button v-else type="success" size="mini">转入</el-button>
                                         </span>
                                     </template>

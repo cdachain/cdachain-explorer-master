@@ -60,7 +60,7 @@
                             <span>-</span>
                         </template>
                         <template v-else>
-                            <router-link tag="a" :to="'/dag/'+activeUnitInfo.previous" target="_blank">{{activeUnitInfo.previous}}</router-link>
+                            <a href="javascript:;" @click="goBlockHash(activeUnitInfo.previous)">{{activeUnitInfo.previous}}</a>
                         </template>
                     </span>
                 </div>
@@ -71,7 +71,7 @@
                             <span>-</span>
                         </template>
                         <template v-else>
-                            <router-link tag="a" :to="'/dag/'+activeUnitInfo.best_parent" target="_blank">{{activeUnitInfo.best_parent}}
+                            <a href="javascript:;" @click="goBlockHash(activeUnitInfo.best_parent)">{{activeUnitInfo.best_parent}}</a>
                             </router-link>
                         </template>
                     </span>
@@ -84,7 +84,7 @@
                         <strong :class="['switch',{'switch-show': showParentsLink }]" @click="toggleParents('parent')">Parents</strong>
                     </template>
                     <div v-for="item in activeUnitInfo.parents" v-show="showParentsLink==true">
-                        <router-link tag="a" :to="'/dag/'+item.parent" target="_blank">{{ item.parent }}</router-link>
+                        <a href="javascript:;" @click="goBlockHash(item.parent)">{{item.parent}}</a>
                     </div>
                 </div>
                 <div class="dashed-line"></div>
@@ -151,7 +151,7 @@
                             </div>
                         </template>
                         <template v-else>
-                            <router-link tag="a" :to="'/dag/'+activeUnitInfo.witness_list_block" target="_blank">{{activeUnitInfo.witness_list_block}}</router-link>
+                            <a href="javascript:;" @click="goBlockHash(activeUnitInfo.witness_list_block)">{{activeUnitInfo.witness_list_block}}</a>
                         </template>
                     </span>
                 </div>
@@ -162,7 +162,7 @@
                             <span>-</span>
                         </template>
                         <template v-else>
-                            <router-link tag="a" :to="'/dag/'+activeUnitInfo.last_summary_block" target="_blank">{{activeUnitInfo.last_summary_block}}</router-link>
+                            <a href="javascript:;" @click="goBlockHash(activeUnitInfo.last_summary_block)">{{activeUnitInfo.last_summary_block}}</a>
                         </template>
                     </span>
                 </div>
@@ -1378,12 +1378,12 @@ export default {
                 self.showWitnessLink =  !self.showWitnessLink;
             }
             
-        }
+        },
         //
-        // goParentHash(hash) {
-        //     self.loadingInfoSwitch = true;
-        //     location.hash = "#/dag/" + hash;
-        // }
+        goBlockHash(hash) {
+            self.loadingInfoSwitch = true;
+            location.hash = "#/dag/" + hash;
+        }
     },
     filters: {
         toCZRVal: function(val) {
