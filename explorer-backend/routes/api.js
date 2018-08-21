@@ -22,6 +22,7 @@ var formatUnits = function (unitsAry) {
     var nodesTempAry = [];
     var tempInfo;
     var tempStatus;
+    var isMinor;
     unitsAry.forEach(function (item) {
         // hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc
         if (item.is_stable) {
@@ -37,6 +38,11 @@ var formatUnits = function (unitsAry) {
         } else {
             tempStatus = 'good'
         }
+        if ((item.from === item.to)&&(item.amount==='0')) {
+            isMinor='is-minor'
+        }else{
+            isMinor='';
+        }
         tempInfo = {
             "data": {
                 "unit": item.hash,
@@ -45,6 +51,7 @@ var formatUnits = function (unitsAry) {
             "pkid": Number(item.pkid),
             "is_on_main_chain": Number(item.is_on_mc),
             "is_stable": Number(item.is_stable),
+            "is_minor": isMinor,
             "sequence": tempStatus
         }
         nodesTempAry.push(tempInfo);
@@ -522,24 +529,41 @@ router.get("/get_previous_units", function (req, res, next) {
     var sqlOptions;
     if (next_pkid) {
         //下一个
+        //PKID find row (isFREE / / / )  select * from transaction where hash = $1
+        //is_free time
+        //is_free time level    
+        //is_free time level    pkid
+
+        /* 
+
+           (is_free < 1) 
+        or 
+           (is_free = 1 and time < xxx)    
+        or 
+           (is_free = 1 and time = xxx and level < yyy)
+        or 
+           (is_free = 1 and time = xxx and level = yyy and pkid < zzz)
+           
+        */
         sqlOptions = {
-            text: "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc FROM transaction WHERE pkid < $1 order by exec_timestamp desc, level desc,pkid desc limit 100",
+            text: "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc,'from','to',amount FROM transaction WHERE pkid < $1 order by is_free desc , exec_timestamp desc, level desc,pkid desc limit 100",
             values: [next_pkid]
         }
     } else if (prev_pkid) {
         //上一个
+        //is_free > 1 (is_free = 1 and time > xxx) or
         sqlOptions = {
-            text: "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc FROM transaction WHERE pkid > $1 order by exec_timestamp desc, level desc,pkid desc limit 100",
+            text: "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc,'from','to',amount FROM transaction WHERE pkid > $1 order by is_free desc , exec_timestamp desc, level desc,pkid desc limit 100",
             values: [prev_pkid]
         }
     } else if (active_unit) {
         //text: "select * from transaction where pkid > ((select pkid from transaction where hash = $1 order by pkid desc limit 1 )-49) order by pkid offset 0 limit 100 "
         sqlOptions = {
-            text: "select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc from transaction where pkid < ((select pkid from transaction where hash = $1 order by pkid desc limit 1 )+50) order by exec_timestamp desc, level desc,pkid desc offset 0 limit 100 ",
+            text: "select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc,'from','to',amount from transaction where pkid < ((select pkid from transaction where hash = $1 order by pkid desc limit 1 )+50) order by is_free desc , exec_timestamp desc, level desc,pkid desc offset 0 limit 100 ",
             values: [active_unit]
         }
     } else {
-        sqlOptions = "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc FROM transaction order by exec_timestamp desc, level desc,pkid desc limit 100"
+        sqlOptions = "Select hash,pkid,is_stable,is_fork,is_invalid,is_fail,is_on_mc,'from','to',amount FROM transaction order by is_free desc , exec_timestamp desc, level desc,pkid desc limit 100"
     }
 
     pgclient.query(sqlOptions, (data) => {

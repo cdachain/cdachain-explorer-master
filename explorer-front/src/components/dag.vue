@@ -343,6 +343,7 @@ export default {
             edges = _edges;
             // firstUnit = nodes[0].rowid;
             // lastUnit = nodes[nodes.length - 1].rowid;
+            // self.formatUnit(nodes);
             firstPkid = nodes[0].pkid;
             lastPkid = nodes[nodes.length - 1].pkid;
             // console.log(firstPkid,lastPkid)
@@ -552,6 +553,30 @@ export default {
                         }
                     },
                     {
+                        selector: ".is_minor",
+                        style: {
+                            'border-width': 2,
+                            // 'position': 'relative',
+                            //	'border-style': 'solid',
+                            //	'border-color': '#2980b9'
+                            //	'border-color': '#333'
+                            "border-top": "2px solid #000",
+                            "border-right": "2px solid #7c7c7c",
+                            "border-bottom": "2px solid #000",
+                            "border-left": "2px solid #7c7c7c",
+                            "border-color": "#D7D7D7"
+                        }
+                    },
+                    {
+                        selector: ".is_minor:after",
+                        style: {
+                            content: "data(unit_s)",
+                            'position': 'absolute',
+                            'top':0,
+                            'left':0
+                        }
+                    },
+                    {
                         selector: ".is_stable",
                         style: {
                             //	'background-color': '#2980b9'
@@ -664,6 +689,9 @@ export default {
                     classes = "";
                     if (_node.is_on_main_chain) {
                         classes += "is_on_main_chain ";
+                    }
+                    if (_node.is_minor) {
+                        classes += "is_minor ";
                     }
                     if (_node.is_stable) {
                         classes += "is_stable ";
@@ -829,6 +857,7 @@ export default {
                 if (_node) {
                     classes = "";
                     if (_node.is_on_main_chain) classes += "is_on_main_chain ";
+                    if (_node.is_minor) classes += "is_minor ";
                     if (_node.is_stable) classes += "is_stable ";
                     if (_node.sequence === "final-bad") classes += "finalBad";
                     if (_node.sequence === "temp-bad") classes += "tempBad";
@@ -959,7 +988,6 @@ export default {
             }
         },
         getNext: function() {
-            console.log("getNext",!bWaitingForNext , isInit)
             if (!bWaitingForNext && isInit) {
                 self.loadingSwitch = true;
                 bWaitingForNext = true;
@@ -970,7 +998,6 @@ export default {
                         }
                     })
                     .then(function(response) {
-                        console.log("getNext",response)
                         self.loadingSwitch = false;
                         var responseData = response.data.units;
 
@@ -1202,6 +1229,7 @@ export default {
                     width: 32,
                     height: 32,
                     is_on_main_chain: node.is_on_main_chain,
+                    is_minor: node.is_minor,
                     is_stable: node.is_stable,
                     sequence: node.sequence
                 });
@@ -1379,6 +1407,17 @@ export default {
             }
             
         },
+
+        //format
+        // formatUnit(nodes){
+        //     let tempAry=[].concat(nodes);
+        //     tempAry.sort(function(a,b){
+        //         return a.pkid-b.pkid;
+        //     })
+        //     console.log(tempAry);
+
+        // },
+
         //
         goBlockHash(hash) {
             self.loadingInfoSwitch = true;
