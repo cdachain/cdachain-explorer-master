@@ -530,19 +530,19 @@ router.get("/get_previous_units", function (req, res, next) {
     if (next_pkid) {
         //下一个
         //PKID find row (isFREE / / / )  select * from transaction where hash = $1
-        //is_free time
-        //is_free time level    
-        //is_free time level    pkid
+        //is_free exec_timestamp
+        //is_free exec_timestamp level    
+        //is_free exec_timestamp level    pkid
 
         /* 
 
            (is_free < 1) 
         or 
-           (is_free = 1 and time < xxx)    
+           (is_free = 1 and exec_timestamp < xxx)    
         or 
-           (is_free = 1 and time = xxx and level < yyy)
+           (is_free = 1 and exec_timestamp = xxx and level < yyy)
         or 
-           (is_free = 1 and time = xxx and level = yyy and pkid < zzz)
+           (is_free = 1 and exec_timestamp = xxx and level = yyy and pkid < zzz)
            
         */
         sqlOptions = {
