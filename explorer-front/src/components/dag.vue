@@ -616,6 +616,84 @@ export default {
                             //	'background-color': '#9cc0da'
                         }
                     },
+                    // 12个见证人
+                    {
+                        selector: ".czr_3wo78xuz6y3j6wm1t9ydyk9hnfig9b5miykxk3pix8duikezrz3dryim36nm",
+                        style: {
+                            'border-color': '#ff0000'
+                        }
+                    },
+                    {
+                        selector: ".czr_3tx4ermquad5u61rztiaynjn3eoitijhjcpwhaem7mtgbrgkgxs87dcuwuzi",
+                        style: {
+                            'border-color': '#00ff78'
+                        }
+                    },
+                    {
+                        selector: ".czr_3n571ydsypy34ea5c7w6z7owyc1hxqgbnqa8em8p6bp6pkk3ii55j14btpn6",
+                        style: {
+                            'border-color': '#00626b'
+                        }
+                    },
+                    {
+                        selector: ".czr_3mzcp6rw6pmzkaghec9u15gbcyb8nkn5ffcdzea7ojrbp53pyw8zwob4asqm",
+                        style: {
+                            'border-color': '#ff0089'
+                        }
+                    },
+
+
+                    {
+                        selector: ".czr_3h66dopq1b5g6s5fe3g8gzf5mpu4bcckyzqz5k8ramborjwahoa3jaz4ogq6",
+                        style: {
+                            'border-color': '#a6ff0a'
+                        }
+                    },
+                    {
+                        selector: ".czr_341qh4575khs734rfi8q7s1kioa541mhm3bfb1mryxyscy19tzarhyitiot6",
+                        style: {
+                            'border-color': '#130162'
+                        }
+                    },
+                    {
+                        selector: ".czr_3wo78xuz6y3j6wm1t9ydyk9hnfig9b5miykxk3pix8duikezrz3dryim36nm",
+                        style: {
+                            'border-color': '#e9aee0'
+                        }
+                    },
+                    {
+                        selector: ".czr_31zno6169xdfwxooug1facquhpobfz4onbbw3wtzwab6magkmy9q9gfn6zod",
+                        style: {
+                            'border-color': '#ab420c'
+                        }
+                    },
+
+
+                    {
+                        selector: ".czr_31ynix6oeb5tn4cemqdyc1ucec5k1fu8juopraigx8xu6i1zph6xpkyyh3fr",
+                        style: {
+                            'border-color': '#631083'
+                        }
+                    },
+                    {
+                        selector: ".czr_1w5jso7p7dpikc8u65ofehfq6sonpyfgiieuce1zqpb1iacmui8qs6ih3wb1",
+                        style: {
+                            'border-color': '#00b6eb'
+                        }
+                    },
+                    {
+                        selector: ".czr_1rfntpgswdih8x9gaa6ekjkyqhdbzc3npo7zy7iupx8eg5czqbqhfaugx4nb",
+                        style: {
+                            'border-color': '#959595'
+                        }
+                    },
+                    {
+                        selector: ".czr_1qbsxr4odr1g65j4erbpdxchxqk87nbj63xr6yfsm5z5u7egx35q54t1h9di",
+                        style: {
+                            'border-color': '#fff300'
+                        }
+                    },
+
                     {
                         selector: ".active",
                         style: {
@@ -724,6 +802,7 @@ export default {
                     if (_node.is_minor) {
                         classes += "is_minor ";
                     }
+                    classes += _node.witness_from;
                     if (_node.is_stable) {
                         classes += "is_stable ";
                     }
@@ -889,6 +968,7 @@ export default {
                     classes = "";
                     if (_node.is_on_main_chain) classes += "is_on_main_chain ";
                     if (_node.is_minor) classes += "is_minor ";
+                    classes += _node.witness_from;
                     if (_node.is_stable) classes += "is_stable ";
                     if (_node.sequence === "final-bad") classes += "finalBad";
                     if (_node.sequence === "temp-bad") classes += "tempBad";
@@ -1290,6 +1370,7 @@ export default {
                     height: 32,
                     is_on_main_chain: node.is_on_main_chain,
                     is_minor: node.is_minor,
+                    witness_from: node.witness_from,
                     is_stable: node.is_stable,
                     sequence: node.sequence
                 });
