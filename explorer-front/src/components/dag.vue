@@ -54,7 +54,7 @@
                     </span>
                 </div>
                 <div class="info-item-dev">
-                    <strong >Previous</strong>:
+                    <strong>Previous</strong>:
                     <span class="info-item-val">
                         <template v-if='activeUnitInfo.previous === "0000000000000000000000000000000000000000000000000000000000000000"'>
                             <span>-</span>
@@ -129,20 +129,20 @@
                 <div class="info-item-dev">
                     <span class="level-wrap">
                         <strong>Exec Time</strong>:
-                    <span class="info-item-val">{{activeUnitInfo.exec_timestamp | toDate}}</span>
+                        <span class="info-item-val">{{activeUnitInfo.exec_timestamp | toDate}}</span>
                     </span>
                     <span class="level-wrap">
                         <strong>Mc Time</strong>:
-                    <span class="info-item-val">{{activeUnitInfo.mc_timestamp | toDate}}</span>
+                        <span class="info-item-val">{{activeUnitInfo.mc_timestamp | toDate}}</span>
                     </span>
                 </div>
                 <div class="dashed-line"></div>
                 <div class="info-item-dev">
                     <template v-if='activeUnitInfo.witness_list_block === "0000000000000000000000000000000000000000000000000000000000000000"'>
-                        <strong  :class="['switch',{'switch-show': showWitnessLink }]"  @click="toggleParents('witness')">Witness List Block</strong>
+                        <strong :class="['switch',{'switch-show': showWitnessLink }]" @click="toggleParents('witness')">Witness List Block</strong>
                     </template>
                     <template v-else>
-                        <strong >Witness List Block</strong>
+                        <strong>Witness List Block</strong>
                     </template>
                     <span class="info-item-val">
                         <template v-if='activeUnitInfo.witness_list_block === "0000000000000000000000000000000000000000000000000000000000000000"'>
@@ -185,13 +185,13 @@
                 <div class="info-item-dev">
                     <strong>From</strong>:
                     <span class="info-item-val">
-                         <router-link tag="a" :to="'/account/'+activeUnitInfo.from" target="_blank">{{activeUnitInfo.from}}</router-link>
+                        <router-link tag="a" :to="'/account/'+activeUnitInfo.from" target="_blank">{{activeUnitInfo.from}}</router-link>
                     </span>
                 </div>
                 <div class="info-item-dev">
                     <strong>To</strong>:
                     <span class="info-item-val">
-                         <router-link tag="a" :to="'/account/'+activeUnitInfo.to" target="_blank">{{activeUnitInfo.to}}</router-link>
+                        <router-link tag="a" :to="'/account/'+activeUnitInfo.to" target="_blank">{{activeUnitInfo.to}}</router-link>
                     </span>
                 </div>
                 <div class="info-item-dev">
@@ -229,10 +229,24 @@ var firstPkid,
     lastPkid,
     // firstUnit, //第一单元
     // lastUnit, //最后单元
-
     phantoms = {},
     phantomsTop = {},
     notStable = []; //不稳定Unit的列表
+
+var firstParameters = {
+    direction: "up",
+    is_free: "",
+    exec_timestamp: "",
+    level: "",
+    pkid: ""
+};
+var lastParameters = {
+    direction: "down",
+    is_free: "",
+    exec_timestamp: "",
+    level: "",
+    pkid: ""
+};
 
 var nextPositionUpdates; //下一个位置更新
 var generateOffset = 0, //生成偏移量
@@ -275,8 +289,8 @@ export default {
             loadingSwitch: true,
             loadingInfoSwitch: false,
             activeUnit: "",
-            showParentsLink:true,
-            showWitnessLink:true,
+            showParentsLink: true,
+            showWitnessLink: true,
             activeUnitInfo: {
                 pkid: "-",
                 hash: "-",
@@ -344,9 +358,27 @@ export default {
             // firstUnit = nodes[0].rowid;
             // lastUnit = nodes[nodes.length - 1].rowid;
             // self.formatUnit(nodes);
-            firstPkid = nodes[0].pkid;
-            lastPkid = nodes[nodes.length - 1].pkid;
-            // console.log(firstPkid,lastPkid)
+            // firstPkid = nodes[0].pkid;
+            // lastPkid = nodes[nodes.length - 1].pkid;
+
+            var firstItem=nodes[0];
+            var lastItem=nodes[nodes.length - 1];
+            firstParameters = {
+                direction: "up",
+                is_free: firstItem.is_free,
+                exec_timestamp: firstItem.exec_timestamp,
+                level: firstItem.level,
+                pkid: firstItem.pkid
+            };
+            lastParameters = {
+                direction: "down",
+                is_free: lastItem.is_free,
+                exec_timestamp: lastItem.exec_timestamp,
+                level: lastItem.level,
+                pkid: lastItem.pkid
+            };
+
+            console.log(firstParameters,lastParameters)
             phantoms = {};
             phantomsTop = {};
             notStable = [];
@@ -360,7 +392,10 @@ export default {
             waitGo = null;
 
             self.createCy();
+                                                console.log("createCy end")
+
             self.generate(_nodes, _edges);
+
             oldOffset =
                 _cy.getElementById(nodes[0].data.unit).position().y + 66;
             _cy.viewport({ zoom: 1.01 });
@@ -449,7 +484,12 @@ export default {
             self.$axios
                 .get("/api/get_previous_units", {
                     params: {
-                        active_unit: searchUnit
+                        active_unit: searchUnit,
+                        parameters:{
+                            direction:'center',
+                            active_unit:searchUnit
+                        }
+                        
                     }
                 })
                 .then(function(response) {
@@ -478,6 +518,10 @@ export default {
         },
 
         createCy: function() {
+
+
+            console.log('createCy 77')
+
             _cy = cytoscape({
                 container: document.getElementById("cy"),
                 boxSelectionEnabled: false,
@@ -555,25 +599,11 @@ export default {
                     {
                         selector: ".is_minor",
                         style: {
-                            'border-width': 2,
+                            "border-width": 2,
                             // 'position': 'relative',
                             //	'border-style': 'solid',
                             //	'border-color': '#2980b9'
-                            //	'border-color': '#333'
-                            "border-top": "2px solid #000",
-                            "border-right": "2px solid #7c7c7c",
-                            "border-bottom": "2px solid #000",
-                            "border-left": "2px solid #7c7c7c",
-                            "border-color": "#D7D7D7"
-                        }
-                    },
-                    {
-                        selector: ".is_minor:after",
-                        style: {
-                            content: "data(unit_s)",
-                            'position': 'absolute',
-                            'top':0,
-                            'left':0
+                            'border-color': '#D7D7D7'
                         }
                     },
                     {
@@ -612,6 +642,7 @@ export default {
                     edges: []
                 }
             });
+            console.log('createCy 99')
 
             //鼠标移入移除
             _cy.on("mouseover", "node", function() {
@@ -951,7 +982,7 @@ export default {
                 self.$axios
                     .get("/api/get_previous_units", {
                         params: {
-                            prev_pkid: firstPkid
+                            parameters:firstParameters
                         }
                     })
                     .then(function(response) {
@@ -965,7 +996,17 @@ export default {
                                     edges[k] = responseData.edges[k];
                                 }
                             }
-                            firstPkid = nodes[0].pkid;
+                            // firstPkid = nodes[0].pkid;
+                            var firstItem=nodes[0];
+                            firstParameters = {
+                                direction: "up",
+                                is_free: firstItem.is_free,
+                                exec_timestamp: firstItem.exec_timestamp,
+                                level: firstItem.level,
+                                pkid: firstItem.pkid
+                            };
+
+
                             self.setNew(
                                 responseData.nodes,
                                 responseData.edges,
@@ -994,7 +1035,7 @@ export default {
                 self.$axios
                     .get("/api/get_previous_units", {
                         params: {
-                            next_pkid: lastPkid
+                            parameters:lastParameters
                         }
                     })
                     .then(function(response) {
@@ -1010,7 +1051,17 @@ export default {
                                     edges[k] = responseData.edges[k];
                                 }
                             }
-                            lastPkid = nodes[nodes.length - 1].pkid;
+                            // lastPkid = nodes[nodes.length - 1].pkid;
+                            var lastItem=nodes[nodes.length - 1];
+                            lastParameters = {
+                                direction: "down",
+                                is_free: lastItem.is_free,
+                                exec_timestamp: lastItem.exec_timestamp,
+                                level: lastItem.level,
+                                pkid: lastItem.pkid
+                            };
+
+
                             self.generate(
                                 responseData.nodes,
                                 responseData.edges
@@ -1037,7 +1088,7 @@ export default {
                 self.$axios
                     .get("/api/get_previous_units", {
                         params: {
-                            prev_pkid: firstPkid
+                            parameters:firstParameters
                         }
                     })
                     .then(function(response) {
@@ -1055,7 +1106,16 @@ export default {
                                     edges[k] = responseData.edges[k];
                                 }
                             }
-                            firstPkid = nodes[0].pkid;
+                            // firstPkid = nodes[0].pkid;
+                            var firstItem=nodes[0];
+                            firstParameters = {
+                                direction: "up",
+                                is_free: firstItem.is_free,
+                                exec_timestamp: firstItem.exec_timestamp,
+                                level: firstItem.level,
+                                pkid: firstItem.pkid
+                            };
+
                             self.setNew(responseData.nodes, responseData.edges);
                         }
                         bWaitingForPrev = false;
@@ -1399,13 +1459,12 @@ export default {
             }
             $inputSearch.val("");
         },
-        toggleParents:function(showLink){
-            if(showLink=='parent'){
-                self.showParentsLink =  !self.showParentsLink;
-            }else if(showLink=='witness'){
-                self.showWitnessLink =  !self.showWitnessLink;
+        toggleParents: function(showLink) {
+            if (showLink == "parent") {
+                self.showParentsLink = !self.showParentsLink;
+            } else if (showLink == "witness") {
+                self.showWitnessLink = !self.showWitnessLink;
             }
-            
         },
 
         //format
@@ -1633,7 +1692,7 @@ body {
     color: #808080;
     font-size: 14px;
 }
-.dashed-line{
+.dashed-line {
     border-bottom: 1px dashed #d6d6d6;
 }
 
@@ -1934,8 +1993,13 @@ pre {
     }
 }
 
-.switch{cursor: pointer;padding: 10px 10px 10px 0;-webkit-user-select: none;position: relative}
-.switch:after{
+.switch {
+    cursor: pointer;
+    padding: 10px 10px 10px 0;
+    -webkit-user-select: none;
+    position: relative;
+}
+.switch:after {
     position: absolute;
     content: "";
     top: 14px;
@@ -1945,7 +2009,7 @@ pre {
     border-bottom: 6px solid transparent;
     border-left: 6px solid #868686;
 }
-.switch-show:after{
+.switch-show:after {
     top: 16px;
     border-top: 6px solid #363636;
     border-right: 6px solid transparent;
