@@ -216,6 +216,7 @@ import("@/assets/js/dagre.min.js");
 var $page;
 var $inputSearch;
 var $cy;
+var DOMCY;
 var $scroll, $scrollBody;
 var $info, $defaultInfo, $listInfo;
 var $addressInfo;
@@ -280,6 +281,9 @@ var bWaitingForNext = false,
 //timer
 var timerInfoMessage;
 var self;
+
+var isWt=false;
+
 export default {
     name: "Dag",
     components: {},
@@ -326,6 +330,11 @@ export default {
     },
     created() {
         self = this;
+        if(window.location.hash.indexOf('?wt=')>1){
+            isWt=true;
+        }else{
+            isWt=false;
+        }
     },
     mounted() {
         self.initVar();
@@ -336,6 +345,7 @@ export default {
             $page = $("#page-index");
             $inputSearch = $("#inputSearch");
             $cy = $page.find("#cy");
+            DOMCY = document.getElementById("cy");
             $scroll = $("#scroll");
             $scrollBody = $("#scrollBody");
             $info = $page.find("#info");
@@ -355,11 +365,6 @@ export default {
         initDate(_nodes, _edges) {
             nodes = _nodes;
             edges = _edges;
-            // firstUnit = nodes[0].rowid;
-            // lastUnit = nodes[nodes.length - 1].rowid;
-            // self.formatUnit(nodes);
-            // firstPkid = nodes[0].pkid;
-            // lastPkid = nodes[nodes.length - 1].pkid;
 
             var firstItem=nodes[0];
             var lastItem=nodes[nodes.length - 1];
@@ -378,7 +383,6 @@ export default {
                 pkid: lastItem.pkid
             };
 
-            console.log(firstParameters,lastParameters)
             phantoms = {};
             phantomsTop = {};
             notStable = [];
@@ -391,8 +395,9 @@ export default {
             activeNode = null;
             waitGo = null;
 
+            // console.log("createCy start ================ ")
             self.createCy();
-                                                console.log("createCy end")
+            // console.log("createCy end")
 
             self.generate(_nodes, _edges);
 
@@ -402,10 +407,10 @@ export default {
             _cy.center(_cy.nodes()[0]);
             page = "dag";
 
-            self.activeUnit = location.hash.substr(6);
+            self.activeUnit = location.hash.substr(6,64);
+            self.activeUnit = ((self.activeUnit.length===64)&&(self.activeUnit.indexOf('wt=')===-1)) ? self.activeUnit : "";
             if (self.activeUnit) {
                 notLastUnitUp = true;
-                // console.log("self.highlightNode",self.activeUnit)
                 self.highlightNode(self.activeUnit);
             }
             isInit = true;
@@ -414,7 +419,8 @@ export default {
         bind: function() {
             //hash改变时触发
             window.addEventListener("hashchange", function() {
-                self.activeUnit = location.hash.substr(6);
+                self.activeUnit = location.hash.substr(6,64);
+                self.activeUnit = ((self.activeUnit.length===64)&&(self.activeUnit.indexOf('wt=')===-1)) ? self.activeUnit : "";
                 if (self.activeUnit.length == 64) {
                     self.highlightNode(self.activeUnit);
                     //隐藏显示的面板
@@ -470,16 +476,18 @@ export default {
         start() {
             if (
                 location.hash.indexOf("#/dag") > -1 &&
-                location.hash.length != 70
+                location.hash.length < 70
             ) {
                 self.getStar();
-            } else if (location.hash.length == 70) {
+            } else {
                 notLastUnitUp = true;
-                self.getStar(location.hash.substr(6));
+                self.getStar(location.hash.substr(6,64));
             }
-            // console.log("start")
         },
         getStar(searchUnit) {
+            if(searchUnit&&(searchUnit.length!==64)){
+                searchUnit='';
+            }
             self.loadingSwitch = true;
             self.$axios
                 .get("/api/get_previous_units", {
@@ -505,7 +513,6 @@ export default {
                     nodes = response.data.units.nodes;
                     edges = response.data.units.edges;
                     self.loadingSwitch = false;
-                    // console.log("response",response.data.units.nodes.length,self.loadingSwitch);
                     self.init(nodes, edges);
                     notLastUnitDown = true;
                     if (bWaitingForHighlightNode) {
@@ -518,12 +525,10 @@ export default {
         },
 
         createCy: function() {
-
-
-            console.log('createCy 77')
-
+            // console.log('createCy 1',DOMCY)
+            // console.log('_cy',_cy)
             _cy = cytoscape({
-                container: document.getElementById("cy"),
+                container: DOMCY,
                 boxSelectionEnabled: false,
                 autounselectify: true,
                 hideEdgesOnViewport: false,
@@ -544,8 +549,6 @@ export default {
                             "background-color": "#fff",
                             "border-width": 1,
                             "border-color": "#5a59a0",
-                            //	'border-color': '#333',
-                            //	'border-style': 'dotted',
                             width: 25,
                             height: 25
                         }
@@ -589,10 +592,6 @@ export default {
                     {
                         selector: ".is_on_main_chain",
                         style: {
-                            //	'border-width': 4,
-                            //	'border-style': 'solid',
-                            //	'border-color': '#2980b9'
-                            //	'border-color': '#333'
                             "background-color": "#9c9bef"
                         }
                     },
@@ -600,20 +599,15 @@ export default {
                         selector: ".is_minor",
                         style: {
                             "border-width": 2,
-                            // 'position': 'relative',
-                            //	'border-style': 'solid',
-                            //	'border-color': '#2980b9'
                             'border-color': '#D7D7D7'
                         }
                     },
                     {
                         selector: ".is_stable",
                         style: {
-                            //	'background-color': '#2980b9'
                             "border-width": 4,
                             "border-style": "solid",
                             "border-color": "#5a59a0"
-                            //	'background-color': '#9cc0da'
                         }
                     },
                     // 12个见证人
@@ -697,7 +691,6 @@ export default {
                     {
                         selector: ".active",
                         style: {
-                            //	'background-color': '#2980b9',
                             "border-color": "#020086",
                             "border-width": "4"
                         }
@@ -720,7 +713,8 @@ export default {
                     edges: []
                 }
             });
-            console.log('createCy 99')
+            // console.log('createCy 2')
+
 
             //鼠标移入移除
             _cy.on("mouseover", "node", function() {
@@ -732,11 +726,11 @@ export default {
 
             //鼠标点击
             _cy.on("click", "node", function(evt) {
-                window.location.href = "/#/dag/" + evt.cyTarget.id();
+                window.location.href = "/#/dag/" + evt.cyTarget.id()  + (isWt?"?wt=1":"");
             });
 
             _cy.on("tap", "node", function(evt) {
-                window.location.href = "/#/dag/" + evt.cyTarget.id();
+                window.location.href = "/#/dag/" + evt.cyTarget.id()  + (isWt?"?wt=1":"");
             });
 
             //拖动事件
@@ -802,7 +796,9 @@ export default {
                     if (_node.is_minor) {
                         classes += "is_minor ";
                     }
-                    classes += _node.witness_from;
+                    if(isWt){
+                        classes += _node.witness_from+"";
+                    }
                     if (_node.is_stable) {
                         classes += "is_stable ";
                     }
@@ -855,6 +851,7 @@ export default {
         //高亮节点 【OK】
         highlightNode: function(unit) {
             self.loadingInfoSwitch = true;
+            // console.log("unit",unit)
             //没有cytoscape 则创建
             if (!_cy) {
                 createCy();
@@ -875,7 +872,7 @@ export default {
             ) {
                 var extent = _cy.extent(); //
                 var elPositionY = el.position().y;
-                lastActiveUnit = location.hash.substr(6); //hash置为 last ActiveUnit
+                lastActiveUnit = location.hash.substr(6,64); //hash置为 last ActiveUnit
                 el.addClass("active");
                 activeNode = el.id();
 
@@ -968,7 +965,9 @@ export default {
                     classes = "";
                     if (_node.is_on_main_chain) classes += "is_on_main_chain ";
                     if (_node.is_minor) classes += "is_minor ";
-                    classes += _node.witness_from;
+                    if(isWt){
+                        classes += _node.witness_from+"";
+                    }
                     if (_node.is_stable) classes += "is_stable ";
                     if (_node.sequence === "final-bad") classes += "finalBad";
                     if (_node.sequence === "temp-bad") classes += "tempBad";
@@ -1259,7 +1258,7 @@ export default {
                     }
                 );
             }
-            location.hash = "#/dag";
+            location.hash = "#/dag"+ (isWt ? "?wt=1" : "");;
             if (activeNode) {
                 _cy.getElementById(activeNode).removeClass("active");
             }
@@ -1534,7 +1533,7 @@ export default {
         searchForm: function() {
             var text = $inputSearch.val();
             if (text.length == 64) {
-                location.hash = "#/dag/" + text;
+                location.hash = "#/dag/" + text + (isWt?"?wt=1":"");
             } else {
                 this.$message.error("请输入正确格式的Block");
             }
@@ -1561,7 +1560,7 @@ export default {
         //
         goBlockHash(hash) {
             self.loadingInfoSwitch = true;
-            location.hash = "#/dag/" + hash;
+            location.hash = "#/dag/" + hash + (isWt?"?wt=1":"");
         }
     },
     filters: {
@@ -1702,7 +1701,6 @@ body {
     border-left: 1px solid #ccc;
     overflow: auto;
 }
-
 #unitParent {
     padding-left: 5px;
 }
@@ -1998,6 +1996,29 @@ pre {
 #tableListTransactions {
     width: 100%;
     border-collapse: collapse;
+}
+
+@media (max-width: 1499px) {
+    #cy {
+        right: 450px;
+    }
+    #info {
+        width: 450px;
+    }
+    #scroll {
+        right: 451px;
+    }
+    #goToTop {
+        right: 490px;
+    }
+}
+@media (min-width: 1500px) {
+    #cy {
+        right: 650px;
+    }
+    #info {
+        width: 650px;
+    }
 }
 
 /* #menuInput  */
