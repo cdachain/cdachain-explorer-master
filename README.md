@@ -1,3 +1,3 @@
-### Canonchain Explorer
+### CDAchain Explorer
 
-标准链区块浏览器
+CDA链区块浏览器
